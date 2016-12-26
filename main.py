@@ -151,7 +151,7 @@ class Handler(Mapa): # The snake charmer
         else:
             return "0;32;40"
 
-def read_config(arch="./config/config.conf"): # Reads config
+def read_config(arch="./config.conf"): # Reads config
     returneo = {}
     with open(arch) as f:
         for x in f.readlines():

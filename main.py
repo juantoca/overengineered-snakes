@@ -1,17 +1,15 @@
 import shutil
 import time
 import random
+import curses
 
 class Tile: # Just tiles
 
-    def __init__(self, coords, color="0;30;40", character = "█", transitable = True):
+    def __init__(self, coords, color=0, character = " ", transitable = True):
         self.coords = coords
         self.character = character
         self.color = color
         self.transitable = transitable
-
-    def printeo(self): # Returns the text to be printed on the tile position
-        return "\x1b[" + self.color + "m" + self.character + "\x1b[0m"
 
 class Body(Tile): # Body of the snake
 
@@ -75,13 +73,17 @@ class Mapa: # Map management
                 returneo[y].append(Tile((x, y)))
         return returneo
 
-    def print_grid(self): # Returns the text to be printed
-        mapa = ""
-        for y in self.grid:
-            mapa += "\n"
+    def print_grid(self, stdscr): # Prints the map using the curses library
+        for y in range(0, len(self.grid) - 1):
+            y = self.grid[y]
+            stdscr.addstr("\n")
             for x in y:
-                mapa += x.printeo() 
-        return mapa
+                stdscr.addstr(x.character, curses.color_pair(x.color))
+        stdscr.addstr("\n")
+        for x in self.grid[len(self.grid)-1]:
+            stdscr.addstr(x.character, curses.color_pair(x.color))
+        stdscr.refresh()
+        stdscr.clear()
 
     def get_coords(self, coords): # Get the object at the given coords
         try:
@@ -145,11 +147,11 @@ class Handler(Mapa): # The snake charmer
                     salir = True
     
     def random_color(self): # Returns a random color
-        colors = ["31", "32", "33", "34", "35", "36", "37"]
+        colors = [0, 2, 3, 4, 5, 6, 7, 8]
         if not self.dalton:
-            return "0;"+random.choice(colors)+";40"
+            return random.choice(colors)
         else:
-            return "0;32;40"
+            return 8
 
 def read_config(arch="./config.conf"): # Reads config
     returneo = {}
@@ -161,12 +163,18 @@ def read_config(arch="./config.conf"): # Reads config
                 returneo[linea[0]] = linea[1].replace("\n", "")
     return returneo
 
+def main(stdscr, mapa, config): # The root method, do not annoy him
+    curses.start_color()
+    curses.use_default_colors()
+    for i in range(0, curses.COLORS):
+        curses.init_pair(i+1, i, -1)
+    while True:    
+        mapa.run(gen=True)
+        mapa.print_grid(stdscr)
+        time.sleep(1/int(config["fps"]))
+
 size = shutil.get_terminal_size()
 config = read_config()
 true = ["True", "true", "TRUE", "1"]
-mapa = Handler(size[1], size[0], clean = config["clear"] in true, percentage = int(config["percentage"]), dalton = config["daltonism"] in true)
-while True:
-    mapa.run(gen = True)
-    print(mapa.print_grid())
-    time.sleep(1/int(config["fps"]))
-
+mapa = Handler(size[1]-1, size[0]-1, clean = config["clear"] in true, percentage = int(config["percentage"]), dalton = config["daltonism"] in true)
+curses.wrapper(main, mapa, config)

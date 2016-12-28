@@ -5,11 +5,13 @@ import curses
 
 class Tile: # Just tiles
 
-    def __init__(self, coords, color=0, character = " ", transitable = True):
+    def __init__(self, coords, color=0, character = " ", transitable = True, behaviour = None):
         self.coords = coords
         self.character = character
         self.color = color
         self.transitable = transitable
+        self.behaviour = behaviour
+        self.nextone = self.coords
 
 class Body(Tile): # Body of the snake
 
@@ -18,33 +20,27 @@ class Body(Tile): # Body of the snake
 
 class Head(Tile): # Head of the snake
 
-    def start(self):
+    def start(self, limit = -1):
         self.start_coordinates = self.coords
+        self.limit = limit
+        self.trigered = False
+        self.length = 0
 
     def run(self, handler): # Control method
+        self.nextone = self.coords
         die = False
         coords = self.coords
-        election = self.choose(handler)
+        election = self.behaviour.choose(handler, self.coords)
         if election:
             self.move(election, handler)
         else:
             die = True
             self.die(mapa)
+        if self.length == self.limit and not self.trigered:
+            handler.removing.append(self.start_coordinates)
+            self.trigered = True
+        self.length += 1
         return die # Returns if the head has died(so the cleaner can give it a proper burial)
-
-
-    def choose(self, mapa): # Choose the next tile to move on
-        variacion = ((0, 1), (0, -1), (1, 0), (-1, 0))
-        possibilities = []
-        for x in variacion:
-            coords = (self.coords[0] + x[0], self.coords[1] + x[1])
-            tile = mapa.get_coords(coords)
-            if tile != False and tile.transitable: # We check if the tile is free
-                possibilities.append(coords)
-        option = False
-        if len(possibilities) > 0: # If there is a possible tile, we choose a random possible position
-            option = random.choice(possibilities)
-        return option
 
     def move(self, coords, mapa): # Moves the head to the given coords
         mapa.set_coords(self.coords, Body(self.coords, color = self.color, character = "#", transitable = False)) # We create a body part on previous location
@@ -57,6 +53,55 @@ class Head(Tile): # Head of the snake
         mapa.set_coords(self.coords, Body(self.coords, color = self.color, character = "#", transitable = False)) # Changes the tile
         tile = mapa.get_coords(self.coords)
         tile.adjacent(self.coords) # Sets the nextone attribute to itself(so the cleaner knows the snake ends)
+
+class IA: # Seems like our snakes are becoming intelligent
+
+    def __init__(self, variacion = [(0, 1), (0, -1), (1, 0), (-1, 0)], weight = [1, 1, 1, 1], 
+                random_weight = True, crazy_behaviour = False, max_jump = 2):
+        self.variacion = variacion
+        self.weight = weight
+        if random_weight:
+            self.random_weight()
+        if crazy_behaviour:
+            self.crazy_behaviour(jump_limit=max_jump)
+
+    def choose(self, mapa, coords): # Make a the decision of where to move on
+        possibilities = []
+        weight = []
+        longitud = len(self.variacion)
+        for x in range(0, longitud):
+            coordinates = (self.variacion[x][0] + coords[0], self.variacion[x][1] + coords[1])
+            tile = mapa.get_coords(coordinates)
+            if tile != False and tile.transitable: # We check if the tile is free
+                possibilities.append(coordinates)
+                weight.append(self.weight[x])
+        option = False
+        if len(possibilities) > 0: # If there is a possible tile, we choose a random possible position
+            option = self.weighted_choice(possibilities, weight)
+        return option
+
+    def weighted_choice(self, options, weight): # Make a decision, weighted based on the values of weight
+        chooser = []
+        counter = 0
+        for x in weight:
+            counter += x
+            chooser.append(counter)
+        eleccion = random.uniform(0, chooser[-1])
+        for x in range(0, len(chooser)):
+            if eleccion < chooser[x]:
+                return options[x]
+
+    def random_weight(self): # Generates a random weighted list
+        total_weight = 0
+        maximum_weigth = 1
+        for x in range(0, len(self.weight)):
+            weight = random.uniform(0.001, maximum_weigth)
+            total_weight += weight
+            self.weight[x] = weight
+
+    def crazy_behaviour(self, jump_limit=2): # Just for some random fun
+        for x in range(0, len(self.variacion)):
+            self.variacion[x] = (random.randint(-jump_limit, jump_limit), random.randint(-jump_limit, jump_limit))
 
 class Mapa: # Map management
 
@@ -86,9 +131,12 @@ class Mapa: # Map management
         stdscr.clear()
 
     def get_coords(self, coords): # Get the object at the given coords
-        try:
-            return self.grid[coords[1]][coords[0]]
-        except IndexError:
+        if coords[0] >= 0 and coords[1] >= 0:
+            try:
+                return self.grid[coords[1]][coords[0]]
+            except IndexError:
+                return False
+        else:
             return False
 
     def set_coords(self, coords, objeto): # Set the object at the given coords
@@ -99,16 +147,22 @@ class Mapa: # Map management
 
 class Handler(Mapa): # The snake charmer
 
-    def __init__(self, alto, ancho, percentage = 25, clean = True, dalton = False):
+    def __init__(self, alto, ancho, percentage = 25, clean = True, dalton = False, headlimit = 1, max_length = -1, 
+                random_weight = True, crazy_behaviour = False, max_jump = 2):
         self.alto =alto
         self.ancho = ancho
         self.percentage = percentage
         self.clear = clean
         self.dalton = dalton
+        self.max_length = max_length
+        self.random_weight = random_weight
+        self.crazy_behaviour = crazy_behaviour
+        self.max_jump = max_jump
         self.grid = self.gen_grid()
         self.heads = {}
         self.removing = []
-    
+        self.head_limit = headlimit
+
     def run(self, gen = False): # Control method
         if gen:
             self.gen_head() # Gen the heads
@@ -116,7 +170,8 @@ class Handler(Mapa): # The snake charmer
         for x in heads: # Updates the heads
             die = self.heads[x].run(self)
             if die:
-                self.removing.append(self.heads[x].start_coordinates) # We set that there's a new snake that needs a meatgrinder session
+                if not self.heads[x].trigered:
+                    self.removing.append(self.heads[x].start_coordinates) # We set that there's a new snake that needs a meatgrinder session
                 del self.heads[x]
         if self.clear:
             self.clean() # Do some magic, just don't touch it
@@ -133,18 +188,20 @@ class Handler(Mapa): # The snake charmer
             self.set_coords(coords, Tile(coords)) # Finally, we clean the tile
         for x in remove:
             self.removing.remove(x)
-                    # And now, he would hit me cause a magician never show its tricks
+                    # And now, he would hit me 'cause a magician never show its tricks
 
     def gen_head(self): # Gens a new head
-        if random.randint(0, 100) <= self.percentage:
-            salir = False
-            while not salir:
-                coords = (random.randint(0, self.ancho-1), random.randint(0, self.alto-1))
-                if self.get_coords(coords).transitable:
-                    self.heads[coords] = Head(coords, character="O", color = self.random_color(), transitable = False)
-                    self.heads[coords].start()
-                    self.set_coords(coords, self.heads[coords])
-                    salir = True
+        if len(self.heads) != self.head_limit:
+            if random.randint(0, 100) <= self.percentage:
+                salir = False
+                while not salir:
+                    coords = (random.randint(0, self.ancho-1), random.randint(0, self.alto-1))
+                    if self.get_coords(coords).transitable:
+                        ia = IA(random_weight = self.random_weight, crazy_behaviour = self.crazy_behaviour, max_jump = self.max_jump)
+                        self.heads[coords] = Head(coords, character="O", color = self.random_color(), transitable = False, behaviour = ia)
+                        self.heads[coords].start(limit = self.max_length)
+                        self.set_coords(coords, self.heads[coords])
+                        salir = True
     
     def random_color(self): # Returns a random color
         colors = [0, 2, 3, 4, 5, 6, 7, 8]
@@ -157,8 +214,9 @@ def read_config(arch="./config.conf"): # Reads config
     returneo = {}
     with open(arch) as f:
         for x in f.readlines():
-            if x[0]!="#" and "=" in x:
-                x = x.replace(" ", "")
+            x = x.replace(" ", "")
+            x = x.replace("\t", "")
+            if x[0]!="#" and "=" in x and x != "\n":
                 linea = x.split("=")
                 returneo[linea[0]] = linea[1].replace("\n", "")
     return returneo
@@ -176,5 +234,7 @@ def main(stdscr, mapa, config): # The root method, do not annoy him
 size = shutil.get_terminal_size()
 config = read_config()
 true = ["True", "true", "TRUE", "1"]
-mapa = Handler(size[1]-1, size[0]-1, clean = config["clear"] in true, percentage = int(config["percentage"]), dalton = config["daltonism"] in true)
+mapa = Handler(size[1]-1, size[0]-1, clean = config["clear"] in true, percentage = int(config["percentage"]), 
+        dalton = config["daltonism"] in true, max_length = int(config["max_length"]), headlimit = int(config["limit"]),
+        random_weight = config["random_weighted"] in true, crazy_behaviour = config["crazy"] in true)
 curses.wrapper(main, mapa, config)

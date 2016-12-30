@@ -35,7 +35,7 @@ class Head(Tile): # Head of the snake
             self.move(election, handler)
         else:
             die = True
-            self.die(mapa)
+            self.die(handler)
         if self.length == self.limit and not self.trigered:
             handler.removing.append(self.start_coordinates)
             self.trigered = True
@@ -147,7 +147,7 @@ class Mapa: # Map management
 
 class Handler(Mapa): # The snake charmer
 
-    def __init__(self, alto, ancho, percentage = 25, clean = True, dalton = False, headlimit = 1, max_length = -1, 
+    def __init__(self, alto, ancho, colors, percentage = 25, clean = True, dalton = False, headlimit = 1, max_length = -1, 
                 random_weight = True, crazy_behaviour = False, max_jump = 2):
         self.alto =alto
         self.ancho = ancho
@@ -158,6 +158,7 @@ class Handler(Mapa): # The snake charmer
         self.random_weight = random_weight
         self.crazy_behaviour = crazy_behaviour
         self.max_jump = max_jump
+        self.colors = colors
         self.grid = self.gen_grid()
         self.heads = {}
         self.removing = []
@@ -204,9 +205,8 @@ class Handler(Mapa): # The snake charmer
                         salir = True
     
     def random_color(self): # Returns a random color
-        colors = [0, 2, 3, 4, 5, 6, 7, 8]
         if not self.dalton:
-            return random.choice(colors)
+            return random.choice(self.colors)
         else:
             return 8
 
@@ -221,20 +221,22 @@ def read_config(arch="./config.conf"): # Reads config
                 returneo[linea[0]] = linea[1].replace("\n", "")
     return returneo
 
-def main(stdscr, mapa, config): # The root method, do not annoy him
+def main(stdscr): # The root method, do not annoy him
+    size = shutil.get_terminal_size()
+    config = read_config()
+    true = ["True", "true", "TRUE", "1"]
     curses.start_color()
     curses.use_default_colors()
+    colors = []
     for i in range(0, curses.COLORS):
         curses.init_pair(i+1, i, -1)
+        colors.append(i)
+    mapa = Handler(size[1]-1, size[0]-1, colors,clean = config["clear"] in true, percentage = int(config["percentage"]), 
+        dalton = config["daltonism"] in true, max_length = int(config["max_length"]), headlimit = int(config["limit"]),
+        random_weight = config["random_weighted"] in true, crazy_behaviour = config["crazy"] in true)
     while True:    
         mapa.run(gen=True)
         mapa.print_grid(stdscr)
         time.sleep(1/int(config["fps"]))
 
-size = shutil.get_terminal_size()
-config = read_config()
-true = ["True", "true", "TRUE", "1"]
-mapa = Handler(size[1]-1, size[0]-1, clean = config["clear"] in true, percentage = int(config["percentage"]), 
-        dalton = config["daltonism"] in true, max_length = int(config["max_length"]), headlimit = int(config["limit"]),
-        random_weight = config["random_weighted"] in true, crazy_behaviour = config["crazy"] in true)
-curses.wrapper(main, mapa, config)
+curses.wrapper(main)

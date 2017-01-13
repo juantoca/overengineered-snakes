@@ -169,7 +169,7 @@ class Handler(Mapa): # The snake charmer
             self.gen_head() # Gen the heads
         heads = list(self.heads.keys())
         for x in heads: # Updates the heads
-            die = self.heads[x].run(self, x)
+            die = self.heads[x].run(self)
             if die:
                 if not self.heads[x].trigered:
                     self.removing.append(self.heads[x].start_coordinates) # We set that there's a new snake that needs a meatgrinder session

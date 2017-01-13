@@ -65,7 +65,7 @@ class IA: # Seems like our snakes are becoming intelligent
         if crazy_behaviour:
             self.crazy_behaviour(jump_limit=max_jump)
 
-    def choose(self, mapa, coords): # Make a the decision of where to move on
+    def posible_moves(self, mapa, coords):
         possibilities = []
         weight = []
         longitud = len(self.variacion)
@@ -75,10 +75,32 @@ class IA: # Seems like our snakes are becoming intelligent
             if tile != False and tile.transitable: # We check if the tile is free
                 possibilities.append(coordinates)
                 weight.append(self.weight[x])
+        return possibilities, weight
+
+
+    def choose(self, mapa, coords): # Make a the decision of where to move on
+        possibilities = self.posible_moves(mapa, coords)
+        possibilities = self.modify_weights(possibilities[0], possibilities[1], mapa)
         option = False
-        if len(possibilities) > 0: # If there is a possible tile, we choose a random possible position
-            option = self.weighted_choice(possibilities, weight)
+        if len(possibilities[0]) > 0: # If there is a possible tile, we choose a random possible position
+            option = self.weighted_choice(possibilities[0], possibilities[1])
         return option
+
+    def modify_weights(self, possibilities, weight, mapa): # We modify the weight based on the enviroment to choose the best movement
+        weighted = []
+        for x in range(0, len(possibilities)):
+            coords = possibilities[x]
+            adjacents = 0
+            for y in self.variacion: # We count the number of bodys around a given possibilitie
+                coordinates = (y[0] + coords[0], y[1] + coords[1])
+                tile = mapa.get_coords(coordinates)
+                if tile != False and tile.__class__.__name__ == "Body":
+                    adjacents += 1
+            if adjacents == 0: # In case of no adjacency, we give privileges to the option
+                weighted.append(weight[x] *100)
+            else:               # If not, we give less priority based on the number of adjacent tiles
+                weighted.append(weight[x] / adjacents)
+        return possibilities, weighted
 
     def weighted_choice(self, options, weight): # Make a decision, weighted based on the values of weight
         chooser = []
@@ -149,7 +171,7 @@ class Handler(Mapa): # The snake charmer
 
     def __init__(self, alto, ancho, colors, percentage = 25, clean = True, dalton = False, headlimit = 1, max_length = -1, 
                 random_weight = True, crazy_behaviour = False, max_jump = 2):
-        self.alto =alto
+        self.alto = alto
         self.ancho = ancho
         self.percentage = percentage
         self.clear = clean
@@ -163,6 +185,7 @@ class Handler(Mapa): # The snake charmer
         self.heads = {}
         self.removing = []
         self.head_limit = headlimit
+        self.max_length = 0
 
     def run(self, gen = False): # Control method
         if gen:
@@ -176,6 +199,21 @@ class Handler(Mapa): # The snake charmer
                 del self.heads[x]
         if self.clear:
             self.clean() # Do some magic, just don't touch it
+        return self.status()
+
+    def status(self): # Generate the dictionary with information about the execution
+        heads = list(self.heads.values())
+        sum_length = 0
+        for x in heads:
+            sum_length += x.length
+            if x.length > self.max_length:
+                self.max_length = x.length
+        try:
+            average = sum_length/len(heads)
+        except ZeroDivisionError:
+            average = 0
+        returneo = {"snakes":len(self.heads), "average length": average, "removing": len(self.removing), "max_length": self.max_length}
+        return returneo
 
     def clean(self): # Harry Potter would be proud of this method
         remove = [] # We store the coords of the snakes that has been deleted completly
@@ -222,22 +260,34 @@ def read_config(arch="./config.conf"): # Reads config
     return returneo
 
 def main(stdscr): # The root method, do not annoy him
-    size = shutil.get_terminal_size()
-    config = read_config()
-    true = ["True", "true", "TRUE", "1"]
-    curses.start_color()
-    curses.use_default_colors()
-    colors = []
-    for i in range(0, curses.COLORS):
-        curses.init_pair(i+1, i, -1)
-        colors.append(i)
+    size = shutil.get_terminal_size() # Gets terminal size so curses won't complain
+    config = read_config() # We read the config
+    true = ["True", "true", "TRUE", "1"] # For boolean checking
+    curses.start_color()             # |
+    curses.use_default_colors()      # |
+    colors = []                      # |
+    for i in range(0, curses.COLORS):# |  Curses shit 
+        curses.init_pair(i+1, i, -1) # |
+        colors.append(i)             # | 
     mapa = Handler(size[1]-1, size[0]-1, colors,clean = config["clear"] in true, percentage = int(config["percentage"]), 
         dalton = config["daltonism"] in true, max_length = int(config["max_length"]), headlimit = int(config["limit"]),
-        random_weight = config["random_weighted"] in true, crazy_behaviour = config["crazy"] in true)
-    while True:    
-        mapa.run(gen=True)
-        mapa.print_grid(stdscr)
-        time.sleep(1/int(config["fps"]))
+        random_weight = config["random_weighted"] in true, crazy_behaviour = config["crazy"] in true) # We init the game class, just read
+    try:                                    # |
+        random.seed(a=int(config["seed"]))  # | We try to set the seed of the random module based on the config
+    except ValueError:                      # |
+        random.seed(a=random.randint(0,100))# |
+    if config["justCalculating"] not in true:    # Graphic Mode
+        while True:    
+            mapa.run(gen=True)
+            mapa.print_grid(stdscr)
+            time.sleep(1/int(config["fps"]))
+    else:                               # Verbose Mode
+        returneo = None
+        for x in range(0, int(config["cicles"])):
+            returneo = mapa.run(gen=True)
+        stdscr.addstr(str(returneo))
+        stdscr.refresh()
+        stdscr.getch()
 
-curses.wrapper(main)
+curses.wrapper(main) # More curses shit
 

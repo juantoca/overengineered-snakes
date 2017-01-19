@@ -1,5 +1,4 @@
 import shutil
-import time
 import random
 import curses
 
@@ -30,13 +29,13 @@ class Head(Tile): # Head of the snake
         self.nextone = self.coords
         die = False
         coords = self.coords
-        election = self.behaviour.choose(handler, self.coords)
+        election = self.behaviour.choose(handler, self.coords) # We choose where to move
         if election:
-            self.move(election, handler)
+            self.move(election, handler) # If there is a possible tile, we move to the selected one
         else:
-            die = True
+            die = True # If not, we kill it
             self.die(handler)
-        if self.length == self.limit and not self.trigered:
+        if self.length == self.limit and not self.trigered: # We add the snake to the cleaner in case it has reached the length limit
             handler.removing.append(self.start_coordinates)
             self.trigered = True
         self.length += 1
@@ -65,9 +64,9 @@ class IA: # Seems like our snakes are becoming intelligent
         if crazy_behaviour:
             self.crazy_behaviour(jump_limit=max_jump)
 
-    def posible_moves(self, mapa, coords):
-        possibilities = []
-        weight = []
+    def posible_moves(self, mapa, coords): # Deletes all the non-possible tiles
+        possibilities = [] # Coordinates
+        weight = [] # Weights
         longitud = len(self.variacion)
         for x in range(0, longitud):
             coordinates = (self.variacion[x][0] + coords[0], self.variacion[x][1] + coords[1])
@@ -82,7 +81,7 @@ class IA: # Seems like our snakes are becoming intelligent
         possibilities = self.posible_moves(mapa, coords)
         possibilities = self.modify_weights(possibilities[0], possibilities[1], mapa)
         option = False
-        if len(possibilities[0]) > 0: # If there is a possible tile, we choose a random possible position
+        if len(possibilities[0]) > 0: # If there is a possible tile, we choose a random-weighted possible position
             option = self.weighted_choice(possibilities[0], possibilities[1])
         return option
 
@@ -91,13 +90,15 @@ class IA: # Seems like our snakes are becoming intelligent
         for x in range(0, len(possibilities)):
             coords = possibilities[x]
             adjacents = 0
-            for y in self.variacion: # We count the number of bodys around a given possibilitie
+            for y in self.variacion: # We count the number of bodys around a given possibility
                 coordinates = (y[0] + coords[0], y[1] + coords[1])
                 tile = mapa.get_coords(coordinates)
                 if tile != False and tile.__class__.__name__ == "Body":
                     adjacents += 1
             if adjacents == 0: # In case of no adjacency, we give privileges to the option
                 weighted.append(weight[x] *100)
+            elif adjacents == 3: # If it would die in the next cicle, we set the minimum weight
+                weighted.append(0.001)
             else:               # If not, we give less priority based on the number of adjacent tiles
                 weighted.append(weight[x] / adjacents)
         return possibilities, weighted
@@ -108,7 +109,7 @@ class IA: # Seems like our snakes are becoming intelligent
         for x in weight:
             counter += x
             chooser.append(counter)
-        eleccion = random.uniform(0, chooser[-1])
+        eleccion = random.uniform(0, chooser[-1]) # We generate a random number between 0 and the sum of the weights
         for x in range(0, len(chooser)):
             if eleccion < chooser[x]:
                 return options[x]
@@ -176,7 +177,7 @@ class Handler(Mapa): # The snake charmer
         self.percentage = percentage
         self.clear = clean
         self.dalton = dalton
-        self.max_length = max_length
+        self.limit_length = max_length
         self.random_weight = random_weight
         self.crazy_behaviour = crazy_behaviour
         self.max_jump = max_jump
@@ -238,7 +239,7 @@ class Handler(Mapa): # The snake charmer
                     if self.get_coords(coords).transitable:
                         ia = IA(random_weight = self.random_weight, crazy_behaviour = self.crazy_behaviour, max_jump = self.max_jump)
                         self.heads[coords] = Head(coords, character="O", color = self.random_color(), transitable = False, behaviour = ia)
-                        self.heads[coords].start(limit = self.max_length)
+                        self.heads[coords].start(limit = self.limit_length)
                         self.set_coords(coords, self.heads[coords])
                         salir = True
     
@@ -277,6 +278,7 @@ def main(stdscr): # The root method, do not annoy him
     except ValueError:                      # |
         random.seed(a=random.randint(0,100))# |
     if config["justCalculating"] not in true:    # Graphic Mode
+        import time
         while True:    
             mapa.run(gen=True)
             mapa.print_grid(stdscr)

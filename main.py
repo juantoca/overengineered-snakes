@@ -287,7 +287,7 @@ class Mapa:
 
 class Handler(Mapa):
 
-    def __init__(self, alto, ancho, colors, percentage=25, clean=True, dalton=False, headlimit=1, max_length=-1,
+    def __init__(self, alto, ancho, colors, percentage=25, clean=True, headlimit=1, max_length=-1,
                  random_weight=True, crazy_behaviour=False, max_jump=2):
         """
         Constructor class for Handler
@@ -296,7 +296,6 @@ class Handler(Mapa):
         :param colors: List of available colors
         :param percentage: Probability of creating a new snake
         :param clean: Shall I clean the corpses?
-        :param dalton: Daltonic mode?
         :param headlimit: Maximum snakes, infinite if negative
         :param max_length: Max length of snakes, infinite if negative
         :param random_weight: Shall I random-weight the snakes?
@@ -306,7 +305,6 @@ class Handler(Mapa):
         super().__init__(alto, ancho)
         self.percentage = percentage
         self.clear = clean
-        self.dalton = dalton
         self.limit_length = max_length
         self.random_weight = random_weight
         self.crazy_behaviour = crazy_behaviour
@@ -397,10 +395,7 @@ class Handler(Mapa):
         Returns a random color index
         :return: Random color index
         """
-        if not self.dalton:
-            return random.choice(self.colors)
-        else:
-            return 8
+        return random.choice(self.colors)
 
 
 def read_config(arch="./config.conf"):
@@ -420,25 +415,65 @@ def read_config(arch="./config.conf"):
     return returneo
 
 
+def options():
+    import sys
+    import getopt
+    true = ["TRUE", "True", "true", "1"]
+    returneo = {"clear": True, "percentage": 100, "fps": 10, "max_length": 30, "limit": -1, "random_weighted": True,
+                "crazy": False, "justCalculating": False, "cicles": 6000, "seed": False}
+    argv = sys.argv[1:]
+    try:
+        opts, args = getopt.getopt(argv, "c:p:f:l:m:r:z:j:o:e:")
+    except Exception as e:
+        print(str(e) + "\n" + "Help")
+        sys.exit()
+    print(opts)
+    opciones = {"c": "clear", "p": "percentage", "f": "fps", "m": "max_length", "l": "limit", "r": "random_weighted",
+                "z": "crazy", "j": "justCalculating", "o": "cicles", "e": "seed"}
+    for x in opts:
+        flag = x[0].replace("-", "")
+        option = opciones[flag]
+        if option in ("clear", "random_weighted", "crazy", "justCalculating"):
+            returneo[option] = x[1] in true
+        elif option in ("percentage", "fps", "max_length", "limit", "cicles"):
+            try:
+                returneo[option] = int(x[1])
+            except ValueError:
+                print("Flag \""+flag+"\" couldn't be converted to integer. Exiting...")
+                sys.exit()
+        elif option == "seed":
+            try:
+                returneo[option] = int(x[1])
+            except:
+                returneo[option] = False
+        else:
+            print("Option {0} unhandled. Exiting...".format(option))
+            sys.exit()
+    return returneo
+
+
 def main(stdscr):  # The root method, do not annoy him
+    options()
     size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
-    config = read_config() # We read the config
-    true = ["True", "true", "TRUE", "1"]  # For boolean checking
+    try:
+        config = read_config()
+    except:
+        config = options()
     curses.start_color()               # |
     curses.use_default_colors()        # |
     colors = []                        # |
     for i in range(0, curses.COLORS):  # |  Curses shit
         curses.init_pair(i+1, i, -1)   # |
         colors.append(i)               # |
-    mapa = Handler(size[1]-1, size[0]-1, colors, clean=config["clear"] in true, percentage=int(config["percentage"]),
-                   dalton=config["daltonism"] in true, max_length=int(config["max_length"]),
-                   headlimit=int(config["limit"]), random_weight=config["random_weighted"] in true,
-                   crazy_behaviour=config["crazy"] in true)  # We init the game class, just read
+    mapa = Handler(size[1]-1, size[0]-1, colors, clean=config["clear"] is True, percentage=int(config["percentage"]),
+                   max_length=int(config["max_length"]), headlimit=int(config["limit"]),
+                   random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True)
+    # We init the game class, just read
     try:                                       # |
         random.seed(a=int(config["seed"]))     # | We try to set the seed of the random module based on the config
     except ValueError:                         # |
         random.seed(a=random.randint(0, 100))  # |
-    if config["justCalculating"] not in true:    # Graphic Mode
+    if config["justCalculating"] is not True:    # Graphic Mode
         import time
         while True:
             tiempo = time.time()   

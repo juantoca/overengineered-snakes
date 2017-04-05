@@ -279,10 +279,15 @@ def main(stdscr): # The root method, do not annoy him
         random.seed(a=random.randint(0,100))# |
     if config["justCalculating"] not in true:    # Graphic Mode
         import time
-        while True:    
+        while True:
+            tiempo = time.time()   
             mapa.run(gen=True)
             mapa.print_grid(stdscr)
-            time.sleep(1/int(config["fps"]))
+            tiempo = time.time() - tiempo
+            try:
+                time.sleep(1/int(config["fps"]) - tiempo)
+            except:
+                pass
     else:                               # Verbose Mode
         returneo = None
         for x in range(0, int(config["cicles"])):

@@ -416,6 +416,11 @@ def read_config(arch="./snakes.conf"):
 
 
 def options():
+    ayuda = "List of allowed parameters:\n-c True/False : Clear corpses?\n-p Int: Probability of creating a new snake" \
+            "\n-f Int: Number of fps\n-m Int: Max length of snakes\n-l Int: Limit of snakes\n-r True/False: " \
+            "Random weighted choices?\n-z True/False: Crazy behaviour?\n-j True/False: Just calculating?\n" \
+            "-o Int: Number of loop to calculate if just calculating\n-e Int: Random seed to be used(String " \
+            "if random seed)"
     import sys
     import getopt
     true = ["TRUE", "True", "true", "1"]
@@ -425,7 +430,7 @@ def options():
     try:
         opts, args = getopt.getopt(argv, "c:p:f:l:m:r:z:j:o:e:")
     except Exception as e:
-        print(str(e) + "\n" + "Help")
+        print(str(e) + "\n" + ayuda)
         sys.exit()
     print(opts)
     opciones = {"c": "clear", "p": "percentage", "f": "fps", "m": "max_length", "l": "limit", "r": "random_weighted",
@@ -452,13 +457,13 @@ def options():
     return returneo
 
 
-def main(stdscr):  # The root method, do not annoy him
+def main(stdscr, config):  # The root method, do not annoy him
     options()
     size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
     try:
         config = read_config()
     except:
-        config = options()
+        pass
     curses.start_color()               # |
     curses.use_default_colors()        # |
     colors = []                        # |
@@ -492,4 +497,4 @@ def main(stdscr):  # The root method, do not annoy him
         stdscr.refresh()
         stdscr.getch()
 
-curses.wrapper(main)  # More curses shit
+curses.wrapper(main, options())  # More curses shit

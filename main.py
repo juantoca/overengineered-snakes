@@ -398,7 +398,7 @@ class Handler(Mapa):
         return random.choice(self.colors)
 
 
-def read_config(arch="./config.conf"):
+def read_config(arch="./snakes.conf"):
     """
     Reads the config file
     :param arch: File to read

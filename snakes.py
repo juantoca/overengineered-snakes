@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+
 import shutil
 import random
 import curses
@@ -419,7 +420,8 @@ def options():
             "\n-f Int: Number of fps\n-m Int: Max length of snakes\n-l Int: Limit of snakes\n-r True/False: " \
             "Random weighted choices?\n-z True/False: Crazy behaviour?\n-j True/False: Just calculating?\n" \
             "-o Int: Number of loop to calculate if just calculating\n-e Int: Random seed to be used(String " \
-            "if random seed)"
+            "if random seed)\n\nIf found a snakes.config file in the running directory, it will load it. A sample" \
+            "file should be available in /usr/share/doc/snakes-git/"
     import sys
     import getopt
     true = ["TRUE", "True", "true", "1"]

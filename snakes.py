@@ -174,7 +174,7 @@ class IA:  # Seems like our snakes are becoming intelligent
                 weighted.append(weight[x] * 100)
             elif adjacents == 3:  # If it would die in the next cicle, we set the minimum weight
                 weighted.append(0.001)
-            else:               # If not, we give less priority based on the number of adjacent tiles
+            else:  # If not, we give less priority based on the number of adjacent tiles
                 weighted.append(weight[x] / adjacents)
         return possibilities, weighted
 
@@ -218,7 +218,6 @@ class IA:  # Seems like our snakes are becoming intelligent
 
 
 class Mapa:
-
     def __init__(self, alto, ancho):
         """
         Constructor class for the map
@@ -253,7 +252,7 @@ class Mapa:
             for x in y:
                 stdscr.addstr(x.character, curses.color_pair(x.color))
         stdscr.addstr("\n")
-        for x in self.grid[len(self.grid)-1]:
+        for x in self.grid[len(self.grid) - 1]:
             stdscr.addstr(x.character, curses.color_pair(x.color))
         stdscr.refresh()
         stdscr.clear()
@@ -286,7 +285,6 @@ class Mapa:
 
 
 class Handler(Mapa):
-
     def __init__(self, alto, ancho, colors, percentage=25, clean=True, headlimit=1, max_length=-1,
                  random_weight=True, crazy_behaviour=False, max_jump=2):
         """
@@ -348,7 +346,7 @@ class Handler(Mapa):
             if x.length > self.max_length:
                 self.max_length = x.length
         try:
-            average = sum_length/len(heads)
+            average = sum_length / len(heads)
         except ZeroDivisionError:
             average = 0
         returneo = {"snakes": len(self.heads), "average length": average, "removing": len(self.removing),
@@ -381,7 +379,7 @@ class Handler(Mapa):
             if random.randint(0, 100) <= self.percentage:
                 salir = False
                 while not salir:
-                    coords = (random.randint(0, self.ancho-1), random.randint(0, self.alto-1))
+                    coords = (random.randint(0, self.ancho - 1), random.randint(0, self.alto - 1))
                     if self.get_coords(coords).transitable:
                         ia = IA(random_weight=self.random_weight, crazy_behaviour=self.crazy_behaviour,
                                 max_jump=self.max_jump)
@@ -389,7 +387,7 @@ class Handler(Mapa):
                                                   behaviour=ia, limit=self.limit_length)
                         self.set_coords(coords, self.heads[coords])
                         salir = True
-    
+
     def random_color(self):
         """
         Returns a random color index
@@ -444,7 +442,7 @@ def options():
             try:
                 returneo[option] = int(x[1])
             except ValueError:
-                print("Flag \""+flag+"\" couldn't be converted to integer. Exiting...")
+                print("Flag \"" + flag + "\" couldn't be converted to integer. Exiting...")
                 sys.exit()
         elif option == "seed":
             try:
@@ -464,37 +462,49 @@ def main(stdscr, config):  # The root method, do not annoy him
         config = read_config()
     except:
         pass
-    curses.start_color()               # |
-    curses.use_default_colors()        # |
-    colors = []                        # |
+    curses.start_color()  # |
+    curses.use_default_colors()  # |
+    colors = []  # |
     for i in range(0, curses.COLORS):  # |  Curses shit
-        curses.init_pair(i+1, i, -1)   # |
-        colors.append(i)               # |
-    mapa = Handler(size[1]-1, size[0]-1, colors, clean=config["clear"] is True, percentage=int(config["percentage"]),
+        curses.init_pair(i + 1, i, -1)  # |
+        colors.append(i)  # |
+    mapa = Handler(size[1] - 1, size[0] - 1, colors, clean=config["clear"] is True,
+                   percentage=int(config["percentage"]),
                    max_length=int(config["max_length"]), headlimit=int(config["limit"]),
                    random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True)
     # We init the game class, just read
-    try:                                       # |
-        random.seed(a=int(config["seed"]))     # | We try to set the seed of the random module based on the config
-    except ValueError:                         # |
+    try:  # |
+        random.seed(a=int(config["seed"]))  # | We try to set the seed of the random module based on the config
+    except ValueError:  # |
         random.seed(a=random.randint(0, 100))  # |
-    if config["justCalculating"] is not True:    # Graphic Mode
+    if config["justCalculating"] is not True:  # Graphic Mode
         import time
         while True:
-            tiempo = time.time()   
+            tmpsize = shutil.get_terminal_size()
+            tiempo = time.time()
             mapa.run(gen=True)
-            mapa.print_grid(stdscr)
-            tiempo = time.time() - tiempo
             try:
-                time.sleep(1/int(config["fps"]) - tiempo)
+                mapa.print_grid(stdscr)
             except:
                 pass
-    else:                               # Verbose Mode
+            if tmpsize != size:  # If the window has been resized, relaunch the app
+                size = tmpsize
+                mapa = Handler(size[1] - 1, size[0] - 1, colors, clean=config["clear"] is True,
+                               percentage=int(config["percentage"]),
+                               max_length=int(config["max_length"]), headlimit=int(config["limit"]),
+                               random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True)
+            tiempo = time.time() - tiempo
+            try:
+                time.sleep(1 / int(config["fps"]) - tiempo)
+            except:
+                pass
+    else:  # Verbose Mode
         returneo = None
         for x in range(0, int(config["cicles"])):
             returneo = mapa.run(gen=True)
         stdscr.addstr(str(returneo))
         stdscr.refresh()
         stdscr.getch()
+
 
 curses.wrapper(main, options())  # More curses shit

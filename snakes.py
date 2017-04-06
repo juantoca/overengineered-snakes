@@ -433,7 +433,6 @@ def options():
     except Exception as e:
         print(str(e) + "\n" + ayuda)
         sys.exit()
-    print(opts)
     opciones = {"c": "clear", "p": "percentage", "f": "fps", "m": "max_length", "l": "limit", "r": "random_weighted",
                 "z": "crazy", "j": "justCalculating", "o": "cicles", "e": "seed"}
     for x in opts:

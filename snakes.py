@@ -421,7 +421,7 @@ def options():
             "Random weighted choices?\n-z True/False: Crazy behaviour?\n-j True/False: Just calculating?\n" \
             "-o Int: Number of loop to calculate if just calculating\n-e Int: Random seed to be used(String " \
             "if random seed)\n\nIf found a snakes.config file in the running directory, it will load it. A sample" \
-            "file should be available in /usr/share/doc/snakes-git/"
+            " file should be available in /usr/share/doc/snakes-git/"
     import sys
     import getopt
     true = ["TRUE", "True", "true", "1"]

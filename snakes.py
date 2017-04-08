@@ -467,21 +467,21 @@ def main(stdscr, config):  # The root method, do not annoy him
         config = read_config()
     except:
         pass
-    curses.start_color()  # |
-    curses.use_default_colors()  # |
-    colors = []  # |
-    for i in range(0, curses.COLORS):  # |  Curses shit
-        curses.init_pair(i + 1, i, -1)  # |
-        colors.append(i)  # |
+    curses.start_color()
+    curses.use_default_colors()
+    colors = []
+    for i in range(0, curses.COLORS):  # Curses shit
+        curses.init_pair(i + 1, i, -1)
+        colors.append(i)
     mapa = Handler(size[1] - 1, size[0] - 1, colors, clean=config["clear"] is True,
                    percentage=int(config["percentage"]),
                    max_length=int(config["max_length"]), headlimit=int(config["limit"]),
                    random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True)
     # We init the game class, just read
-    try:  # |
-        random.seed(a=int(config["seed"]))  # | We try to set the seed of the random module based on the config
-    except ValueError:  # |
-        random.seed(a=random.randint(0, 100))  # |
+    try:
+        random.seed(a=int(config["seed"]))  # We try to set the seed of the random module based on the config
+    except ValueError:
+        random.seed(a=random.randint(0, 100))
     if config["justCalculating"] is not True:  # Graphic Mode
         import time
         while True:

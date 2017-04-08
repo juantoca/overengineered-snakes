@@ -429,7 +429,7 @@ def options():
                 "crazy": False, "justCalculating": False, "cicles": 6000, "seed": False}
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv, "c:p:f:l:m:r:z:j:o:e:")
+        opts, args = getopt.getopt(argv, "c:p:f:l:m:r:z:j:o:e:", ["help"])
     except Exception as e:
         print(str(e) + "\n" + ayuda)
         sys.exit()
@@ -437,6 +437,9 @@ def options():
                 "z": "crazy", "j": "justCalculating", "o": "cicles", "e": "seed"}
     for x in opts:
         flag = x[0].replace("-", "")
+        if flag == "help":
+            print(ayuda)
+            sys.exit()
         option = opciones[flag]
         if option in ("clear", "random_weighted", "crazy", "justCalculating"):
             returneo[option] = x[1] in true

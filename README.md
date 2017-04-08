@@ -1,2 +1,5 @@
 # snakes-terminalsaver
-Stupid snakes moving around your terminal(inspired by the mythical snake game)
+ZPG game based on the mythical game 'Snake'. It spawns tons of snakes that try to survive avoiding hiting other snakes or the 
+terminal borders.
+
+<img src=http://imgur.com/rvNzTNL>

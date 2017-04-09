@@ -467,6 +467,8 @@ def main(stdscr, config):  # The root method, do not annoy him
             mapa.run(gen=True)
             try:
                 mapa.print_grid(stdscr)
+            except KeyboardInterrupt:
+                exit()
             except:
                 pass
             if tmpsize != size:  # If the window has been resized, relaunch the app
@@ -478,6 +480,8 @@ def main(stdscr, config):  # The root method, do not annoy him
             tiempo = time.time() - tiempo
             try:
                 time.sleep(1 / int(config["fps"]) - tiempo)
+            except KeyboardInterrupt:
+                exit()
             except:
                 pass
     else:  # Verbose Mode
@@ -488,4 +492,7 @@ def main(stdscr, config):  # The root method, do not annoy him
         stdscr.refresh()
         stdscr.getch()
 
-curses.wrapper(main, options())
+try:
+    curses.wrapper(main, options())
+except KeyboardInterrupt:
+    exit()

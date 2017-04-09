@@ -27,7 +27,6 @@ pkgver() {
 package() {
 	cd "$srcdir/$pkgname"
   	install -Dm 755 snakes.py "${pkgdir}/usr/bin/snakes"
-  	install -Dm 644 snakes.conf "${pkgdir}/usr/share/doc/${pkgname}/snakes.config"
   	install -Dm 644 LICENSE "${pkgdir}/usr/share/doc/${pkgname}/LICENSE"
 }
 

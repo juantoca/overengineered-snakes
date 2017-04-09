@@ -248,6 +248,7 @@ class Mapa:
         :param stdscr: Stdscr object from curses library
         :return: VOID
         """
+        stdscr.clear()
         for y in range(0, len(self.grid) - 1):
             y = self.grid[y]
             stdscr.addstr("\n")
@@ -257,7 +258,6 @@ class Mapa:
         for x in self.grid[len(self.grid) - 1]:
             stdscr.addstr(x.character, curses.color_pair(x.color))
         stdscr.refresh()
-        stdscr.clear()
 
     def get_coords(self, coords):
         """
@@ -397,31 +397,12 @@ class Handler(Mapa):
         """
         return random.choice(self.colors)
 
-
-def read_config(arch="./snakes.conf"):
-    """
-    Reads the config file
-    :param arch: File to read
-    :return: Dictionary of options
-    """
-    returneo = {}
-    with open(arch) as f:
-        for x in f.readlines():
-            x = x.replace(" ", "")
-            x = x.replace("\t", "")
-            if x[0] != "#" and "=" in x and x != "\n":
-                linea = x.split("=")
-                returneo[linea[0]] = linea[1].replace("\n", "")
-    return returneo
-
-
 def options():
     ayuda = "List of allowed parameters:\n-c True/False : Clear corpses?\n-p Int: Probability of creating a new snake" \
             "\n-f Int: Number of fps\n-m Int: Max length of snakes\n-l Int: Limit of snakes\n-r True/False: " \
             "Random weighted choices?\n-z True/False: Crazy behaviour?\n-j True/False: Just calculating?\n" \
             "-o Int: Number of loop to calculate if just calculating\n-e Int: Random seed to be used(String " \
-            "if random seed)\n\nIf found a snakes.config file in the running directory, it will load it. A sample" \
-            " file should be available in /usr/share/doc/snakes-git/"
+            "if random seed)"
     import sys
     import getopt
     true = ["TRUE", "True", "true", "1"]
@@ -461,12 +442,8 @@ def options():
 
 
 def main(stdscr, config):  # The root method, do not annoy him
-    options()
+    config = options()
     size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
-    try:
-        config = read_config()
-    except:
-        pass
     curses.start_color()
     curses.use_default_colors()
     colors = []
@@ -478,9 +455,9 @@ def main(stdscr, config):  # The root method, do not annoy him
                    max_length=int(config["max_length"]), headlimit=int(config["limit"]),
                    random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True)
     # We init the game class, just read
-    try:
-        random.seed(a=int(config["seed"]))  # We try to set the seed of the random module based on the config
-    except ValueError:
+    if config["seed"] is not False:  # We try to set the seed of the random module based on the config
+        random.seed(a=int(config["seed"]))
+    else:
         random.seed(a=random.randint(0, 100))
     if config["justCalculating"] is not True:  # Graphic Mode
         import time
@@ -511,5 +488,4 @@ def main(stdscr, config):  # The root method, do not annoy him
         stdscr.refresh()
         stdscr.getch()
 
-
-curses.wrapper(main, options())  # More curses shit
+curses.wrapper(main, options())

@@ -397,6 +397,7 @@ class Handler(Mapa):
         """
         return random.choice(self.colors)
 
+
 def options():
     ayuda = "List of allowed parameters:\n-c True/False : Clear corpses?\n-p Int: Probability of creating a new snake" \
             "\n-f Int: Number of fps\n-m Int: Max length of snakes\n-l Int: Limit of snakes\n-r True/False: " \
@@ -441,7 +442,7 @@ def options():
     return returneo
 
 
-def main(stdscr, config):  # The root method, do not annoy him
+def main(stdscr):  # The root method, do not annoy him
     config = options()
     size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
     curses.start_color()
@@ -492,7 +493,8 @@ def main(stdscr, config):  # The root method, do not annoy him
         stdscr.refresh()
         stdscr.getch()
 
-try:
-    curses.wrapper(main, options())
-except KeyboardInterrupt:
-    exit()
+if __name__ == "__main__":
+    try:
+        curses.wrapper(main)
+    except KeyboardInterrupt:
+        exit()

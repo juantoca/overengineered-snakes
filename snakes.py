@@ -311,7 +311,7 @@ class Handler(Mapa):
         self.max_jump = max_jump
         self.colors = colors
         self.grid = self.gen_grid()
-        self.heads = {}
+        self.heads = []
         self.removing = []
         self.head_limit = headlimit
         self.max_length = 0
@@ -322,16 +322,18 @@ class Handler(Mapa):
         :param gen: Shall I generate new snakes?
         :return: Status dictionary
         """
+        delete = []
         if gen:
             self.gen_head()  # Gen the heads
-        heads = list(self.heads.keys())
-        for x in heads:  # Updates the heads
+        for x in range(0, len(self.heads)):  # Updates the heads
             die = self.heads[x].run(self)
             if die:
                 if not self.heads[x].trigered:
                     self.removing.append(self.heads[x].start_coordinates)
                     # We set that there's a new snake that needs a meatgrinder session
-                del self.heads[x]
+                delete.append(self.heads[x])
+        for x in delete:
+            self.heads.remove(x)
         if self.clear:
             self.clean()  # Do some magic, just don't touch it
         return self.status()
@@ -341,7 +343,7 @@ class Handler(Mapa):
         Generates the status dictionary
         :return: {"snakes", "average length", "removing", "max_length"}
         """
-        heads = list(self.heads.values())
+        heads = self.heads
         sum_length = 0
         for x in heads:
             sum_length += x.length
@@ -385,9 +387,10 @@ class Handler(Mapa):
                     if self.get_coords(coords).transitable:
                         ia = IA(random_weight=self.random_weight, crazy_behaviour=self.crazy_behaviour,
                                 max_jump=self.max_jump)
-                        self.heads[coords] = Head(coords, character="O", color=self.random_color(), transitable=False,
-                                                  behaviour=ia, limit=self.limit_length)
-                        self.set_coords(coords, self.heads[coords])
+                        head = Head(coords, character="O", color=self.random_color(), transitable=False,
+                                    behaviour=ia, limit=self.limit_length)
+                        self.heads.append(head)
+                        self.set_coords(coords, head)
                         salir = True
 
     def random_color(self):

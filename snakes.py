@@ -446,6 +446,7 @@ def options():
 
 
 def main(stdscr):  # The root method, do not annoy him
+    curses.curs_set(0)
     config = options()
     size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
     curses.start_color()

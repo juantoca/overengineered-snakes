@@ -379,19 +379,22 @@ class Handler(Mapa):
         Generates a new head
         :return: VOID
         """
+        percentage = self.percentage
         if len(self.heads) != self.head_limit:
-            if random.randint(0, 100) <= self.percentage:
-                salir = False
-                while not salir:
-                    coords = (random.randint(0, self.ancho - 1), random.randint(0, self.alto - 1))
-                    if self.get_coords(coords).transitable:
-                        ia = IA(random_weight=self.random_weight, crazy_behaviour=self.crazy_behaviour,
-                                max_jump=self.max_jump)
-                        head = Head(coords, character="O", color=self.random_color(), transitable=False,
-                                    behaviour=ia, limit=self.limit_length)
-                        self.heads.append(head)
-                        self.set_coords(coords, head)
-                        salir = True
+            while percentage > 0:
+                percentage -= 100
+                if random.randint(0, 100) <= self.percentage:
+                    salir = False
+                    while not salir:
+                        coords = (random.randint(0, self.ancho - 1), random.randint(0, self.alto - 1))
+                        if self.get_coords(coords).transitable:
+                            ia = IA(random_weight=self.random_weight, crazy_behaviour=self.crazy_behaviour,
+                                    max_jump=self.max_jump)
+                            head = Head(coords, character="O", color=self.random_color(), transitable=False,
+                                        behaviour=ia, limit=self.limit_length)
+                            self.heads.append(head)
+                            self.set_coords(coords, head)
+                            salir = True
 
     def random_color(self):
         """
@@ -445,9 +448,8 @@ def options():
     return returneo
 
 
-def main(stdscr):  # The root method, do not annoy him
+def main(stdscr, config):  # The root method, do not annoy him
     curses.curs_set(0)
-    config = options()
     size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
     curses.start_color()
     curses.use_default_colors()
@@ -499,6 +501,6 @@ def main(stdscr):  # The root method, do not annoy him
 
 if __name__ == "__main__":
     try:
-        curses.wrapper(main)
+        curses.wrapper(main, options())
     except KeyboardInterrupt:
         exit()

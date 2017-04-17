@@ -326,9 +326,8 @@ class Handler(Mapa):
         :param gen: Shall I generate new snakes?
         :return: Status dictionary
         """
+        filled = False
         delete = []
-        if gen:
-            self.gen_head()  # Gen the heads
         for x in range(0, len(self.heads)):  # Updates the heads
             die = self.heads[x].run(self)
             if die:
@@ -340,9 +339,11 @@ class Handler(Mapa):
             self.heads.remove(x)
         if self.clear:
             self.clean()  # Do some magic, just don't touch it
-        return self.status()
+        if gen:
+            filled = self.gen_head()  # Gen the heads
+        return self.status(filled)
 
-    def status(self):
+    def status(self, filled):
         """
         Generates the status dictionary
         :return: {"snakes", "average length", "removing", "max_length"}
@@ -358,7 +359,7 @@ class Handler(Mapa):
         except ZeroDivisionError:
             average = 0
         returneo = {"snakes": len(self.heads), "average length": average, "removing": len(self.removing),
-                    "max_length": self.max_length}
+                    "max_length": self.max_length, "filled": filled}
         return returneo
 
     def clean(self):  # Harry Potter would be proud of this method
@@ -383,12 +384,13 @@ class Handler(Mapa):
         Generates a new head
         :return: VOID
         """
+        filled = False
         percentage = self.percentage
-        while percentage > 0:
+        while percentage > 0 and not filled:
             percentage -= 100
-            if random.randint(0, 100) <= self.percentage and len(self.heads) != self.head_limit:
-                salir = False
-                while not salir:
+            if random.randint(0, 100) <= self.percentage and len(self.heads) != self.head_limit and not filled:
+                salir = 100
+                while salir > 0:
                     coords = (random.randint(0, self.ancho - 1), random.randint(0, self.alto - 1))
                     if self.get_coords(coords).transitable:
                         ia = IA(random_weight=self.random_weight, crazy_behaviour=self.crazy_behaviour,
@@ -397,9 +399,14 @@ class Handler(Mapa):
                                     behaviour=ia, limit=self.limit_length, body_char=self.body_char)
                         self.heads.append(head)
                         self.set_coords(coords, head)
-                        salir = True
+                        salir = 0
+                    else:
+                        salir -= 1
+                        if salir < 1:
+                            filled = True
             else:
                 percentage = -1
+        return filled
 
     def random_color(self):
         """
@@ -488,18 +495,15 @@ def main(stdscr, config):  # The root method, do not annoy him
         while True:
             tmpsize = shutil.get_terminal_size()
             tiempo = time.time()
-            if config["filled"]:
-                def alarma(signum, frame):
-                    raise curses.error
-                signal.signal(signal.SIGALRM, alarma)
-                signal.alarm(config["timeout"])
-            mapa.run(gen=True)
+            status = mapa.run(gen=True)
             try:
                 mapa.print_grid(stdscr)
             except KeyboardInterrupt:
                 exit()
+            if config["filled"] and status["filled"] and status["snakes"] == 0:
+                time.sleep(config["timeout"])
+                raise curses.error
             if tmpsize != size:  # If the window has been resized, relaunch the app
-                size = tmpsize
                 raise curses.error
             tiempo = time.time() - tiempo
             try:

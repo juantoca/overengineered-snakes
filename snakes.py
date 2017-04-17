@@ -389,7 +389,7 @@ class Handler(Mapa):
         while percentage > 0 and not filled:
             percentage -= 100
             if random.randint(0, 100) <= self.percentage and len(self.heads) != self.head_limit and not filled:
-                salir = 100
+                salir = 100000
                 while salir > 0:
                     coords = (random.randint(0, self.ancho - 1), random.randint(0, self.alto - 1))
                     if self.get_coords(coords).transitable:

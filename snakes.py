@@ -3,6 +3,7 @@
 import shutil
 import random
 import curses
+import signal
 
 
 class Tile:  # Just tiles
@@ -43,7 +44,7 @@ class Head(Tile):  # Head of the snake
     Class that represents the head of the snake. It does all the magic stuff
     """
 
-    def __init__(self, coords, behaviour, color=0, character="0", transitable=True, limit=-1):
+    def __init__(self, coords, behaviour, color=0, character="0", transitable=True, limit=-1, body_char = "#"):
         """
         Constructor for the head class
         :param coords: Initial coords
@@ -59,6 +60,7 @@ class Head(Tile):  # Head of the snake
         self.limit = limit
         self.trigered = False
         self.length = 0
+        self.body_char = body_char
         self.nextone = self.coords
 
     def run(self, handler):
@@ -89,7 +91,7 @@ class Head(Tile):  # Head of the snake
         :param mapa: Game class to modify
         :return: VOID
         """
-        mapa.set_coords(self.coords, Body(self.coords, coords, color=self.color, character="#",
+        mapa.set_coords(self.coords, Body(self.coords, coords, color=self.color, character=self.body_char,
                                           transitable=False))  # We create a body part on previous location
         self.coords = coords
         mapa.set_coords(coords, self)  # Finally, we change the destination tile to ourselfs
@@ -100,7 +102,7 @@ class Head(Tile):  # Head of the snake
         :param mapa: Game class to modify
         :return: VOID
         """
-        mapa.set_coords(self.coords, Body(self.coords, self.coords, color=self.color, character="#",
+        mapa.set_coords(self.coords, Body(self.coords, self.coords, color=self.color, character=self.body_char,
                                           transitable=False))  # Changes the tile
 
 
@@ -288,7 +290,7 @@ class Mapa:
 
 class Handler(Mapa):
     def __init__(self, alto, ancho, colors, percentage=25, clean=True, headlimit=1, max_length=-1,
-                 random_weight=True, crazy_behaviour=False, max_jump=2):
+                 random_weight=True, crazy_behaviour=False, max_jump=2, body_char = "#", head_char = "O"):
         """
         Constructor class for Handler
         :param alto: Height
@@ -315,6 +317,8 @@ class Handler(Mapa):
         self.removing = []
         self.head_limit = headlimit
         self.max_length = 0
+        self.body_char = body_char
+        self.head_char = head_char
 
     def run(self, gen=True):
         """
@@ -380,21 +384,23 @@ class Handler(Mapa):
         :return: VOID
         """
         percentage = self.percentage
-        if len(self.heads) != self.head_limit:
-            while percentage > 0:
-                percentage -= 100
-                if random.randint(0, 100) <= self.percentage:
-                    salir = False
-                    while not salir:
-                        coords = (random.randint(0, self.ancho - 1), random.randint(0, self.alto - 1))
-                        if self.get_coords(coords).transitable:
-                            ia = IA(random_weight=self.random_weight, crazy_behaviour=self.crazy_behaviour,
-                                    max_jump=self.max_jump)
-                            head = Head(coords, character="O", color=self.random_color(), transitable=False,
-                                        behaviour=ia, limit=self.limit_length)
-                            self.heads.append(head)
-                            self.set_coords(coords, head)
-                            salir = True
+        while percentage > 0:
+            percentage -= 100
+            if random.randint(0, 100) <= self.percentage and len(self.heads) != self.head_limit:
+                salir = False
+                while not salir:
+                    coords = (random.randint(0, self.ancho - 1), random.randint(0, self.alto - 1))
+                    if self.get_coords(coords).transitable:
+                        ia = IA(random_weight=self.random_weight, crazy_behaviour=self.crazy_behaviour,
+                                max_jump=self.max_jump)
+                        head = Head(coords, character=self.head_char, color=self.random_color(), transitable=False,
+                                    behaviour=ia, limit=self.limit_length, body_char=self.body_char)
+                        self.heads.append(head)
+                        self.set_coords(coords, head)
+                        salir = True
+                    else:
+                        percentage = -1
+                        salir = True
 
     def random_color(self):
         """
@@ -409,34 +415,45 @@ def options():
             "\n-f Int: Number of fps\n-m Int: Max length of snakes\n-l Int: Limit of snakes\n-r True/False: " \
             "Random weighted choices?\n-z True/False: Crazy behaviour?\n-j True/False: Just calculating?\n" \
             "-o Int: Number of loop to calculate if just calculating\n-e Int: Random seed to be used(String " \
-            "if random seed)"
+            "if random seed)\n-d Boolean: Shall I reset if the map is filled?" \
+            "\n-t Int: If d, How much time shall I wait?\n-h Char: Character to represent the head of the snakes\n" \
+            "-b Char: Character to represent the body of the snakes"
     import sys
     import getopt
     true = ["TRUE", "True", "true", "1"]
     returneo = {"clear": True, "percentage": 100, "fps": 10, "max_length": 30, "limit": -1, "random_weighted": True,
-                "crazy": False, "justCalculating": False, "cicles": 6000, "seed": False}
+                "crazy": False, "justCalculating": False, "cicles": 6000, "seed": False, "filled": True,
+                "timeout": 10, "head": "O", "body": "#"}
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv, "c:p:f:l:m:r:z:j:o:e:", ["help"])
+        opts, args = getopt.getopt(argv, "c:p:f:l:m:r:z:j:o:e:r:d:t:b:h:", ["help"])
     except Exception as e:
         print(str(e) + "\n" + ayuda)
         sys.exit()
     opciones = {"c": "clear", "p": "percentage", "f": "fps", "m": "max_length", "l": "limit", "r": "random_weighted",
-                "z": "crazy", "j": "justCalculating", "o": "cicles", "e": "seed"}
+                "z": "crazy", "j": "justCalculating", "o": "cicles", "e": "seed", "d": "filled", "t": "timeout",
+                "h": "head", "b": "body"}
     for x in opts:
         flag = x[0].replace("-", "")
         if flag == "help":
             print(ayuda)
             sys.exit()
         option = opciones[flag]
-        if option in ("clear", "random_weighted", "crazy", "justCalculating"):
+        if option in ("clear", "random_weighted", "crazy", "justCalculating", "filled"):
             returneo[option] = x[1] in true
-        elif option in ("percentage", "fps", "max_length", "limit", "cicles"):
+        elif option in ("percentage", "fps", "max_length", "limit", "cicles", "timeout"):
             try:
                 returneo[option] = int(x[1])
             except ValueError:
                 print("Flag \"" + flag + "\" couldn't be converted to integer. Exiting...")
                 sys.exit()
+        elif option in ("head", "body"):
+            if len(x[1]) != 1:
+                print("Invalid character")
+                print(ayuda)
+                sys.exit()
+            else:
+                returneo[option] = x[1]
         elif option == "seed":
             try:
                 returneo[option] = int(x[1])
@@ -460,7 +477,8 @@ def main(stdscr, config):  # The root method, do not annoy him
     mapa = Handler(size[1] - 1, size[0] - 1, colors, clean=config["clear"] is True,
                    percentage=int(config["percentage"]),
                    max_length=int(config["max_length"]), headlimit=int(config["limit"]),
-                   random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True)
+                   random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True,
+                   body_char=config["body"], head_char=config["head"])
     # We init the game class, just read
     if config["seed"] is not False:  # We try to set the seed of the random module based on the config
         random.seed(a=int(config["seed"]))
@@ -471,19 +489,19 @@ def main(stdscr, config):  # The root method, do not annoy him
         while True:
             tmpsize = shutil.get_terminal_size()
             tiempo = time.time()
+            if config["filled"]:
+                def alarma(signum, frame):
+                    raise curses.error
+                signal.signal(signal.SIGALRM, alarma)
+                signal.alarm(config["timeout"])
             mapa.run(gen=True)
             try:
                 mapa.print_grid(stdscr)
             except KeyboardInterrupt:
                 exit()
-            except:
-                pass
             if tmpsize != size:  # If the window has been resized, relaunch the app
                 size = tmpsize
-                mapa = Handler(size[1] - 1, size[0] - 1, colors, clean=config["clear"] is True,
-                               percentage=int(config["percentage"]),
-                               max_length=int(config["max_length"]), headlimit=int(config["limit"]),
-                               random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True)
+                raise curses.error
             tiempo = time.time() - tiempo
             try:
                 time.sleep(1 / int(config["fps"]) - tiempo)
@@ -500,7 +518,11 @@ def main(stdscr, config):  # The root method, do not annoy him
         stdscr.getch()
 
 if __name__ == "__main__":
-    try:
-        curses.wrapper(main, options())
-    except KeyboardInterrupt:
-        exit()
+    while True:
+        config = options()
+        try:
+            curses.wrapper(main, config)
+        except KeyboardInterrupt:
+            exit()
+        except curses.error:
+            pass

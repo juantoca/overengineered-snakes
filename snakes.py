@@ -398,9 +398,8 @@ class Handler(Mapa):
                         self.heads.append(head)
                         self.set_coords(coords, head)
                         salir = True
-                    else:
-                        percentage = -1
-                        salir = True
+            else:
+                percentage = -1
 
     def random_color(self):
         """

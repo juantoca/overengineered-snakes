@@ -109,7 +109,7 @@ class Head(Tile):  # Head of the snake
 class IA:  # Seems like our snakes are becoming intelligent
 
     def __init__(self, variacion=[(0, 1), (0, -1), (1, 0), (-1, 0)], weight=[1, 1, 1, 1],
-                 random_weight=True, crazy_behaviour=False, max_jump=2):
+                 random_weight=True, crazy_behaviour=False, max_jump=10):
         """
         IA for the snakes
         :param variacion: Tuple of possible variations of the current position
@@ -172,7 +172,7 @@ class IA:  # Seems like our snakes are becoming intelligent
             for y in self.variacion:  # We count the number of bodys around a given possibility
                 coordinates = (y[0] + coords[0], y[1] + coords[1])
                 tile = mapa.get_coords(coordinates)
-                if tile and tile.__class__.__name__ == "Body":
+                if not tile or (tile and tile.__class__.__name__ == "Body"):
                     adjacents += 1
             if adjacents == 0:  # In case of no adjacency, we give privileges to the option
                 weighted.append(weight[x] * 100)
@@ -251,13 +251,12 @@ class Mapa:
         :return: VOID
         """
         stdscr.clear()
-        for y in range(0, len(self.grid) - 1):
+        for y in range(0, len(self.grid)-1):
             y = self.grid[y]
-            stdscr.addstr("\n")
             for x in y:
                 stdscr.addstr(x.character, curses.color_pair(x.color))
-        stdscr.addstr("\n")
-        for x in self.grid[len(self.grid) - 1]:
+            stdscr.addstr("\n")
+        for x in self.grid[-1]:
             stdscr.addstr(x.character, curses.color_pair(x.color))
         stdscr.refresh()
 
@@ -267,13 +266,7 @@ class Mapa:
         :param coords: Coordinates to search in
         :return: (x, y) or False if not a valid tile
         """
-        if coords[0] >= 0 and coords[1] >= 0:
-            try:
-                return self.grid[coords[1]][coords[0]]
-            except IndexError:
-                return False
-        else:
-            return False
+        return self.grid[coords[1] % len(self.grid)][coords[0] % len(self.grid[0])]
 
     def set_coords(self, coords, objeto):
         """
@@ -283,14 +276,14 @@ class Mapa:
         :return: False if not a valid position
         """
         try:
-            self.grid[coords[1]][coords[0]] = objeto
+            self.grid[coords[1] % len(self.grid)][coords[0] % len(self.grid[0])] = objeto
         except IndexError:
             return False
 
 
 class Handler(Mapa):
     def __init__(self, alto, ancho, colors, percentage=25, clean=True, headlimit=1, max_length=-1,
-                 random_weight=True, crazy_behaviour=False, max_jump=2, body_char = "#", head_char = "O"):
+                 random_weight=True, crazy_behaviour=False, max_jump=5, body_char="#", head_char="O"):
         """
         Constructor class for Handler
         :param alto: Height
@@ -480,7 +473,7 @@ def main(stdscr, config):  # The root method, do not annoy him
     for i in range(0, curses.COLORS):  # Curses shit
         curses.init_pair(i + 1, i, -1)
         colors.append(i)
-    mapa = Handler(size[1] - 1, size[0] - 1, colors, clean=config["clear"] is True,
+    mapa = Handler(size[1], size[0]-1, colors, clean=config["clear"] is True,
                    percentage=int(config["percentage"]),
                    max_length=int(config["max_length"]), headlimit=int(config["limit"]),
                    random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True,

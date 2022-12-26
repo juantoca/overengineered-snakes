@@ -1,9 +1,5 @@
-#! /usr/bin/env python
-
-import shutil
-import random
 import curses
-import signal
+import random
 
 
 class Tile:  # Just tiles
@@ -104,6 +100,52 @@ class Head(Tile):  # Head of the snake
         """
         mapa.set_coords(self.coords, Body(self.coords, self.coords, color=self.color, character=self.body_char,
                                           transitable=False))  # Changes the tile
+
+
+
+class Mapa:
+    def __init__(self, alto, ancho):
+        """
+        Constructor class for the map
+        :param alto: height
+        :param ancho: width
+        """
+        self.alto = alto
+        self.ancho = ancho
+        self.grid = self.gen_grid()
+
+    def gen_grid(self):
+        """
+        Generates the grid matrix, filing it with empty tiles
+        :return: Matrix map
+        """
+        returneo = []
+        for y in range(0, self.alto):
+            returneo.append([])
+            for x in range(0, self.ancho):
+                returneo[y].append(Tile((x, y)))
+        return returneo
+
+    def get_coords(self, coords):
+        """
+        Return the object at given coords
+        :param coords: Coordinates to search in
+        :return: (x, y) or False if not a valid tile
+        """
+        return self.grid[coords[1] % len(self.grid)][coords[0] % len(self.grid[0])]
+
+    def set_coords(self, coords, objeto):
+        """
+        Changes the object at given coords
+        :param coords: Coordinates to change
+        :param objeto: Object to insert
+        :return: False if not a valid position
+        """
+        try:
+            self.grid[coords[1] % len(self.grid)][coords[0] % len(self.grid[0])] = objeto
+        except IndexError:
+            return False
+
 
 
 class IA:  # Seems like our snakes are becoming intelligent
@@ -221,64 +263,6 @@ class IA:  # Seems like our snakes are becoming intelligent
             self.variacion[x] = (random.randint(-jump_limit, jump_limit), random.randint(-jump_limit, jump_limit))
 
 
-class Mapa:
-    def __init__(self, alto, ancho):
-        """
-        Constructor class for the map
-        :param alto: height
-        :param ancho: width
-        """
-        self.alto = alto
-        self.ancho = ancho
-        self.grid = self.gen_grid()
-
-    def gen_grid(self):
-        """
-        Generates the grid matrix, filing it with empty tiles
-        :return: Matrix map
-        """
-        returneo = []
-        for y in range(0, self.alto):
-            returneo.append([])
-            for x in range(0, self.ancho):
-                returneo[y].append(Tile((x, y)))
-        return returneo
-
-    def print_grid(self, stdscr):
-        """
-        Prints the map using the curses library
-        :param stdscr: Stdscr object from curses library
-        :return: VOID
-        """
-        stdscr.clear()
-        for y in range(0, len(self.grid)-1):
-            y = self.grid[y]
-            for x in y:
-                stdscr.addstr(x.character, curses.color_pair(x.color))
-            stdscr.addstr("\n")
-        for x in self.grid[-1]:
-            stdscr.addstr(x.character, curses.color_pair(x.color))
-        stdscr.refresh()
-
-    def get_coords(self, coords):
-        """
-        Return the object at given coords
-        :param coords: Coordinates to search in
-        :return: (x, y) or False if not a valid tile
-        """
-        return self.grid[coords[1] % len(self.grid)][coords[0] % len(self.grid[0])]
-
-    def set_coords(self, coords, objeto):
-        """
-        Changes the object at given coords
-        :param coords: Coordinates to change
-        :param objeto: Object to insert
-        :return: False if not a valid position
-        """
-        try:
-            self.grid[coords[1] % len(self.grid)][coords[0] % len(self.grid[0])] = objeto
-        except IndexError:
-            return False
 
 
 class Handler(Mapa):
@@ -408,117 +392,3 @@ class Handler(Mapa):
         """
         return random.choice(self.colors)
 
-
-def options():
-    ayuda = "List of allowed parameters:\n-c True/False : Clear corpses?\n-p Int: Probability of creating a new snake" \
-            "\n-f Int: Number of fps\n-m Int: Max length of snakes\n-l Int: Limit of snakes\n-r True/False: " \
-            "Random weighted choices?\n-z True/False: Crazy behaviour?\n-j True/False: Just calculating?\n" \
-            "-o Int: Number of loop to calculate if just calculating\n-e Int: Random seed to be used(String " \
-            "if random seed)\n-d Boolean: Shall I reset if the map is filled?" \
-            "\n-t Int: If d, How much time shall I wait?\n-h Char: Character to represent the head of the snakes\n" \
-            "-b Char: Character to represent the body of the snakes"
-    import sys
-    import getopt
-    true = ["TRUE", "True", "true", "1"]
-    returneo = {"clear": True, "percentage": 100, "fps": 10, "max_length": 30, "limit": -1, "random_weighted": True,
-                "crazy": False, "justCalculating": False, "cicles": 6000, "seed": False, "filled": True,
-                "timeout": 10, "head": "O", "body": "#"}
-    argv = sys.argv[1:]
-    try:
-        opts, args = getopt.getopt(argv, "c:p:f:l:m:r:z:j:o:e:r:d:t:b:h:", ["help"])
-    except Exception as e:
-        print(str(e) + "\n" + ayuda)
-        sys.exit()
-    opciones = {"c": "clear", "p": "percentage", "f": "fps", "m": "max_length", "l": "limit", "r": "random_weighted",
-                "z": "crazy", "j": "justCalculating", "o": "cicles", "e": "seed", "d": "filled", "t": "timeout",
-                "h": "head", "b": "body"}
-    for x in opts:
-        flag = x[0].replace("-", "")
-        if flag == "help":
-            print(ayuda)
-            sys.exit()
-        option = opciones[flag]
-        if option in ("clear", "random_weighted", "crazy", "justCalculating", "filled"):
-            returneo[option] = x[1] in true
-        elif option in ("percentage", "fps", "max_length", "limit", "cicles", "timeout"):
-            try:
-                returneo[option] = int(x[1])
-            except ValueError:
-                print("Flag \"" + flag + "\" couldn't be converted to integer. Exiting...")
-                sys.exit()
-        elif option in ("head", "body"):
-            if len(x[1]) != 1:
-                print("Invalid character")
-                print(ayuda)
-                sys.exit()
-            else:
-                returneo[option] = x[1]
-        elif option == "seed":
-            try:
-                returneo[option] = int(x[1])
-            except:
-                returneo[option] = False
-        else:
-            print("Option {0} unhandled. Exiting...".format(option))
-            sys.exit()
-    return returneo
-
-
-def main(stdscr, config):  # The root method, do not annoy him
-    curses.curs_set(0)
-    size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
-    curses.start_color()
-    curses.use_default_colors()
-    colors = []
-    for i in range(0, curses.COLORS):  # Curses shit
-        curses.init_pair(i + 1, i, -1)
-        colors.append(i)
-    mapa = Handler(size[1], size[0]-1, colors, clean=config["clear"] is True,
-                   percentage=int(config["percentage"]),
-                   max_length=int(config["max_length"]), headlimit=int(config["limit"]),
-                   random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True,
-                   body_char=config["body"], head_char=config["head"])
-    # We init the game class, just read
-    if config["seed"] is not False:  # We try to set the seed of the random module based on the config
-        random.seed(a=int(config["seed"]))
-    else:
-        random.seed(a=random.randint(0, 100))
-    if config["justCalculating"] is not True:  # Graphic Mode
-        import time
-        while True:
-            tmpsize = shutil.get_terminal_size()
-            tiempo = time.time()
-            status = mapa.run(gen=True)
-            try:
-                mapa.print_grid(stdscr)
-            except KeyboardInterrupt:
-                exit()
-            if config["filled"] and status["filled"] and status["snakes"] == 0:
-                time.sleep(config["timeout"])
-                raise curses.error
-            if tmpsize != size:  # If the window has been resized, relaunch the app
-                raise curses.error
-            tiempo = time.time() - tiempo
-            try:
-                time.sleep(1 / int(config["fps"]) - tiempo)
-            except KeyboardInterrupt:
-                exit()
-            except:
-                pass
-    else:  # Verbose Mode
-        returneo = None
-        for x in range(0, int(config["cicles"])):
-            returneo = mapa.run(gen=True)
-        stdscr.addstr(str(returneo))
-        stdscr.refresh()
-        stdscr.getch()
-
-if __name__ == "__main__":
-    while True:
-        config = options()
-        try:
-            curses.wrapper(main, config)
-        except KeyboardInterrupt:
-            exit()
-        except curses.error:
-            pass

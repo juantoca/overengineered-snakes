@@ -3,7 +3,7 @@ from __future__ import annotations
 from overengineered_snakes.configs.config import Config
 
 
-def options():
+def options() -> Config:
     ayuda = (
         "List of allowed parameters:\n"
         "-c True/False : Clear corpses?\n"
@@ -103,4 +103,4 @@ def options():
         else:
             print(f"Option {option} unhandled. Exiting...")
             sys.exit()
-    return Config(**returneo)
+    return Config(**returneo)  # type: ignore

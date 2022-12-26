@@ -12,7 +12,7 @@ class CursesRenderer:
         for i in range(0, curses.COLORS):  # Curses shit
             curses.init_pair(i + 1, i, -1)
 
-    def render(self, handler: Handler):
+    def render(self, handler: Handler) -> None:
         self.stdscr.clear()
         for y in range(0, len(handler.grid) - 1):
             y_array = handler.grid[y]

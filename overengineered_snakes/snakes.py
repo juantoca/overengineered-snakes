@@ -4,6 +4,7 @@ import shutil
 import random
 import curses
 from backend import Handler
+from overengineered_snakes.renderers.curses import CursesRenderer
 
 
 
@@ -64,19 +65,16 @@ def options():
 
 
 def main(stdscr, config):  # The root method, do not annoy him
-    curses.curs_set(0)
     size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
-    curses.start_color()
-    curses.use_default_colors()
     colors = []
     for i in range(0, curses.COLORS):  # Curses shit
-        curses.init_pair(i + 1, i, -1)
         colors.append(i)
-    mapa = PrintableHandler(size[1], size[0]-1, colors, clean=config["clear"] is True,
+    mapa = Handler(size[1], size[0]-1, colors, clean=config["clear"] is True,
                    percentage=int(config["percentage"]),
                    max_length=int(config["max_length"]), headlimit=int(config["limit"]),
                    random_weight=config["random_weighted"] is True, crazy_behaviour=config["crazy"] is True,
                    body_char=config["body"], head_char=config["head"])
+    renderer = CursesRenderer()
     # We init the game class, just read
     if config["seed"] is not False:  # We try to set the seed of the random module based on the config
         random.seed(a=int(config["seed"]))
@@ -89,7 +87,7 @@ def main(stdscr, config):  # The root method, do not annoy him
             tiempo = time.time()
             status = mapa.run(gen=True)
             try:
-                mapa.print_grid(stdscr)
+                renderer.render(mapa)
             except KeyboardInterrupt:
                 exit()
             if config["filled"] and status["filled"] and status["snakes"] == 0:

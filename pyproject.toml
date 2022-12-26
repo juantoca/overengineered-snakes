@@ -22,3 +22,6 @@ hypothesis = "^6.61.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.autopep8]
+max_line_length = 79

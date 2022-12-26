@@ -9,7 +9,7 @@ url="https://github.com/elan17/snakes-terminalsaver"
 license=('GPL3')
 groups=()
 depends=()
-makedepends=('git' 'python') 
+makedepends=('git' 'python')
 provides=("${pkgname%-VCS}")
 conflicts=("${pkgname%-VCS}")
 replaces=()
@@ -30,4 +30,3 @@ package() {
   	install -Dm 755 snakes.py "${pkgdir}/usr/bin/snakes"
   	install -Dm 644 LICENSE "${pkgdir}/usr/share/doc/${pkgname}/LICENSE"
 }
-

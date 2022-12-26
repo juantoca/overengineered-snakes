@@ -1,8 +1,8 @@
 #! /usr/bin/env python
-
-import shutil
-import random
 import curses
+import random
+import shutil
+
 from overengineered_snakes.backend import Handler
 from overengineered_snakes.cli.parse_args import options
 from overengineered_snakes.configs.config import Config
@@ -14,19 +14,30 @@ def __main(stdscr, config: Config):  # The root method, do not annoy him
     colors = []
     for i in range(0, curses.COLORS):  # Curses shit
         colors.append(i)
-    mapa = Handler(size[1], size[0]-1, colors, clean=config.clear,
-                   percentage=config.percentage,
-                   max_length=config.max_length, headlimit=config.limit,
-                   random_weight=config.random_weighted, crazy_behaviour=config.crazy,
-                   body_char=config.body, head_char=config.head)
+    mapa = Handler(
+        size[1],
+        size[0] - 1,
+        colors,
+        clean=config.clear,
+        percentage=config.percentage,
+        max_length=config.max_length,
+        headlimit=config.limit,
+        random_weight=config.random_weighted,
+        crazy_behaviour=config.crazy,
+        body_char=config.body,
+        head_char=config.head,
+    )
     renderer = CursesRenderer()
     # We init the game class, just read
-    if config.seed is not False:  # We try to set the seed of the random module based on the config
+    if (
+        config.seed is not False
+    ):  # We try to set the seed of the random module based on the config
         random.seed(a=config.seed)
     else:
         random.seed(a=random.randint(0, 100))
     if config.justCalculating is not True:  # Graphic Mode
         import time
+
         while True:
             tmpsize = shutil.get_terminal_size()
             tiempo = time.time()
@@ -45,7 +56,7 @@ def __main(stdscr, config: Config):  # The root method, do not annoy him
                 time.sleep(1 / config.fps - tiempo)
             except KeyboardInterrupt:
                 exit()
-            except:
+            except:  # noqa: E722
                 pass
     else:  # Verbose Mode
         returneo = None
@@ -54,6 +65,7 @@ def __main(stdscr, config: Config):  # The root method, do not annoy him
         stdscr.addstr(str(returneo))
         stdscr.refresh()
         stdscr.getch()
+
 
 def main():
     while True:

@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "overengineered-snakes"
+version = "0.0.1"
+description = "An inneccessarily overengineered little ZPG"
+authors = ["Juan Toca <elan17.programacion@gmail.com>"]
+license = "GPL3"
+readme = "README.md"
+packages = [{include = "overengineered_snakes"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.scripts]
+snakes = "overengineered_snakes.snakes:main"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.21.0"
+pytest = "^7.2.0"
+hypothesis = "^6.61.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

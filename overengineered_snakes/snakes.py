@@ -3,13 +3,13 @@
 import shutil
 import random
 import curses
-from backend import Handler
+from overengineered_snakes.backend import Handler
 from overengineered_snakes.cli.parse_args import options
 from overengineered_snakes.configs.config import Config
 from overengineered_snakes.renderers.curses import CursesRenderer
 
 
-def main(stdscr, config: Config):  # The root method, do not annoy him
+def __main(stdscr, config: Config):  # The root method, do not annoy him
     size = shutil.get_terminal_size()  # Gets terminal size so curses won't complain
     colors = []
     for i in range(0, curses.COLORS):  # Curses shit
@@ -55,11 +55,11 @@ def main(stdscr, config: Config):  # The root method, do not annoy him
         stdscr.refresh()
         stdscr.getch()
 
-if __name__ == "__main__":
+def main():
     while True:
         config: Config = options()
         try:
-            curses.wrapper(main, config)
+            curses.wrapper(__main, config)
         except KeyboardInterrupt:
             exit()
         except curses.error:

@@ -1,6 +1,4 @@
-
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -15,7 +13,7 @@ class Config:
     crazy: bool
     justCalculating: bool
     cicles: int
-    seed: Optional[int]
+    seed: int | None
     filled: bool
     timeout: int
     head: str

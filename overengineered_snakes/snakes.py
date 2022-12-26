@@ -5,24 +5,6 @@ import random
 import curses
 from backend import Handler
 
-class PrintableHandler(Handler):
-    
-    def print_grid(self, stdscr):
-        """
-        Prints the map using the curses library
-        :param stdscr: Stdscr object from curses library
-        :return: VOID
-        """
-        stdscr.clear()
-        for y in range(0, len(self.grid)-1):
-            y = self.grid[y]
-            for x in y:
-                stdscr.addstr(x.character, curses.color_pair(x.color))
-            stdscr.addstr("\n")
-        for x in self.grid[-1]:
-            stdscr.addstr(x.character, curses.color_pair(x.color))
-        stdscr.refresh()
-
 
 
 

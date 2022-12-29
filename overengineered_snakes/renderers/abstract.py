@@ -1,7 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 
-from overengineered_snakes.backend import Handler
+from overengineered_snakes.handler import Handler
 
 
 class AbstractRenderer(ABC):

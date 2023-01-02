@@ -1,6 +1,5 @@
 from hypothesis import assume
 from hypothesis.strategies import booleans
-from hypothesis.strategies import builds
 from hypothesis.strategies import composite
 from hypothesis.strategies import DrawFn
 from hypothesis.strategies import floats
@@ -10,9 +9,6 @@ from hypothesis.strategies import SearchStrategy
 from hypothesis.strategies import tuples
 
 from overengineered_snakes.backend.behaviours.simple import IA
-
-
-ia_st_simple = builds(IA)
 
 
 @composite

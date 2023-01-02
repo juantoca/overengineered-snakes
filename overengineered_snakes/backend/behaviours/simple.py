@@ -8,7 +8,7 @@ class IA:  # Seems like our snakes are becoming intelligent
     def __init__(
         self,
         variacion: list[Tuple[int, int]] = [(0, 1), (0, -1), (1, 0), (-1, 0)],
-        weight: list[int] = [1, 1, 1, 1],
+        weight: list[float] = [1, 1, 1, 1],
         random_weight: bool = True,
         crazy_behaviour: bool = False,
         max_jump: int = 10,
@@ -143,7 +143,7 @@ class IA:  # Seems like our snakes are becoming intelligent
         for x in range(0, len(self.weight)):
             weight = random.uniform(0.001, maximum_weigth)
             total_weight += weight
-            self.weight[x] = weight  # type: ignore
+            self.weight[x] = weight
 
     def crazy_behaviour(self, jump_limit: int = 2) -> None:
         """

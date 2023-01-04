@@ -1,6 +1,6 @@
 import curses
 
-from overengineered_snakes.backend import Handler
+from overengineered_snakes.handler import Handler
 
 
 class CursesRenderer:

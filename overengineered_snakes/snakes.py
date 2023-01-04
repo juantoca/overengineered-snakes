@@ -4,9 +4,9 @@ import random
 import shutil
 from typing import Any
 
-from overengineered_snakes.backend import Handler
 from overengineered_snakes.cli.parse_args import options
 from overengineered_snakes.configs.config import Config
+from overengineered_snakes.handler import Handler
 from overengineered_snakes.renderers.curses import CursesRenderer
 
 

@@ -6,6 +6,7 @@ authors = ["Juan Toca <elan17.programacion@gmail.com>"]
 license = "GPL3"
 readme = "README.md"
 packages = [{include = "overengineered_snakes"}]
+exclude = ["**/test*"]
 
 [tool.poetry.dependencies]
 python = "^3.10"

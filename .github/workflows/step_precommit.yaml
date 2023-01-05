@@ -19,5 +19,5 @@ jobs:
       run: poetry install --with dev
     - name: Run commitizen
       run: |
-        poetry run cz check --rev-range, master..HEAD
+        poetry run cz check --rev-range master..HEAD
         poetry run cz check --message ${{ github.event.pull_request.title }}

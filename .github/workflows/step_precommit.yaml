@@ -18,4 +18,6 @@ jobs:
     - name: Install dependencies
       run: poetry install --with dev
     - name: Run commitizen
-      run: poetry run cz check --message '${{ github.event.pull_request.title }}'
+      run: |
+        poetry run cz check --message '${{ github.event.pull_request.title }}'
+        poetry run cz check --rev-range master..${{ github.event.pull_request.head.sha }}

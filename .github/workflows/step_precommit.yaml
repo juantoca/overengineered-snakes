@@ -13,6 +13,10 @@ jobs:
         python-version: '3.10'
     - name: Run pre-commit
       uses: pre-commit/action@v3.0.0
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    - name: Install dependencies
+      run: poetry install --with dev
     - name: Run commitizen
       run: |
         poetry run cz check --rev-range, master..HEAD

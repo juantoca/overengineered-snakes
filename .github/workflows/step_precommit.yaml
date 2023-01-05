@@ -13,3 +13,7 @@ jobs:
         python-version: '3.10'
     - name: Run pre-commit
       uses: pre-commit/action@v3.0.0
+    - name: Run commitizen
+      run: |
+        cz check --rev-range, master..HEAD
+        cz check --message ${{ github.event.pull_request.title }}

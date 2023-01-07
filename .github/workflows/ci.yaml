@@ -1,0 +1,10 @@
+on:
+  pull_request:
+
+jobs:
+  pre-commit:
+    uses: ./.github/workflows/step_precommit.yaml
+    secrets: inherit
+  unittests:
+    uses: ./.github/workflows/step_unittests.yaml
+    secrets: inherit

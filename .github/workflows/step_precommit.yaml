@@ -22,4 +22,4 @@ jobs:
     - name: Run commitizen
       run: |
         poetry run cz check --message '${{ github.event.pull_request.title }}'
-        poetry run cz check --rev-range master..${{ github.event.pull_request.head.sha }}
+        poetry run cz check --rev-range origin/master..HEAD

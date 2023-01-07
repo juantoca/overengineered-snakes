@@ -155,14 +155,14 @@ testing = ["covdefaults (>=2.2.2)", "coverage (>=7.0.1)", "pytest (>=7.2)", "pyt
 
 [[package]]
 name = "hypothesis"
-version = "6.61.0"
+version = "6.61.1"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "hypothesis-6.61.0-py3-none-any.whl", hash = "sha256:7bb22d22e35db99d5724bbf5bdc686b46add94a0f228bf1be249c47ec46b9c7f"},
-    {file = "hypothesis-6.61.0.tar.gz", hash = "sha256:fbf7da30aea839d88898f74bcc027f0f997060498a8a7605880688c8a2166215"},
+    {file = "hypothesis-6.61.1-py3-none-any.whl", hash = "sha256:30f555858eb5343c2e3f2ee6b1d2583631427a796b107a168c4de3c06a6b5e7d"},
+    {file = "hypothesis-6.61.1.tar.gz", hash = "sha256:b9644c8e606482c4642d534e484cae8df4d8b5c87306003877d0f72793def71b"},
 ]
 
 [package.dependencies]

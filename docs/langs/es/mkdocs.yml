@@ -1,0 +1,2 @@
+INHERIT: ../../mkdocs_common.yml
+site_name: My Docs

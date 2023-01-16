@@ -1,0 +1,15 @@
+theme:
+  name: material
+  language: en
+
+extra:
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: Spanish
+      link: /es/
+      lang: es
+
+markdown_extensions:
+  - pymdownx.snippets

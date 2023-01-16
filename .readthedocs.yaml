@@ -15,6 +15,7 @@ build:
       - poetry config virtualenvs.create false
       - poetry install --with docs --with dev
       - poetry run python docs/scripts/build_site.py
+      - mkdir _readthedocs/
       - mv docs/site/ _readthedocs/html
 
 

@@ -14,7 +14,7 @@ build:
       - pip install poetry
       - poetry config virtualenvs.create false
       - poetry install --with docs --with dev
-      - poetry run docs/scripts/build_site.py
+      - poetry run python docs/scripts/build_site.py
 
 
 

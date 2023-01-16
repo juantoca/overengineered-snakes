@@ -1,4 +1,4 @@
-# snakes-terminalsaver
+# overengineered-snakes
 
 [![Read The Docs](https://readthedocs.org/projects/overengineered-snakes/badge/?version=latest)](https://overengineered-snakes.readthedocs.io/en/latest/?badge=latest)
 

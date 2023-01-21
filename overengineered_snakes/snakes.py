@@ -4,7 +4,7 @@ import random
 import shutil
 from typing import Any
 
-from overengineered_snakes.cli.parse_args import options
+from overengineered_snakes.cli.parse_args import get_config
 from overengineered_snakes.configs.config import Config
 from overengineered_snakes.handler import Handler
 from overengineered_snakes.renderers.curses import CursesRenderer
@@ -70,7 +70,7 @@ def __main(stdscr: Any, config: Config) -> None:  # The root method, do not anno
 
 def main() -> None:
     while True:
-        config: Config = options()
+        config: Config = get_config()
         try:
             curses.wrapper(__main, config)
         except KeyboardInterrupt:

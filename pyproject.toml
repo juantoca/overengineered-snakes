@@ -36,5 +36,5 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
 relative_files = true
-source = "my_project/"
+source = "overengineered_snaes/"
 branch = true

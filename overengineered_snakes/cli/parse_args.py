@@ -1,106 +1,112 @@
 from __future__ import annotations
 
+import argparse
+
 from overengineered_snakes.configs.config import Config
 
 
-def options() -> Config:
-    ayuda = (
-        "List of allowed parameters:\n"
-        "-c True/False : Clear corpses?\n"
-        "-p Int: Probability of creating a new snake\n"
-        "-f Int: Number of fps\n-m Int: Max length of snakes\n"
-        "-l Int: Limit of snakes\n"
-        "-r True/False: Random weighted choices?\n"
-        "-z True/False: Crazy behaviour?\n-j True/False: Just calculating?\n"
-        "-o Int: Number of loop to calculate if just calculating\n"
-        "-e Int: Random seed to be used(String if random seed)\n"
-        "-d Boolean: Shall I reset if the map is filled?\n"
-        "-t Int: If d, How much time shall I wait?\n"
-        "-h Char: Character to represent the head of the snakes\n"
-        "-b Char: Character to represent the body of the snakes"
+def get_config() -> Config:
+    parser = argparse.ArgumentParser(
+        prog="snakes",
+        description="A ZPG simulation of several snakes",
     )
-    import sys
-    import getopt
-
-    true = ["TRUE", "True", "true", "1"]
-    returneo = {
-        "clear": True,
-        "percentage": 100,
-        "fps": 10,
-        "max_length": 30,
-        "limit": -1,
-        "random_weighted": True,
-        "crazy": False,
-        "justCalculating": False,
-        "cicles": 6000,
-        "seed": False,
-        "filled": True,
-        "timeout": 10,
-        "head": "O",
-        "body": "#",
-    }
-    argv = sys.argv[1:]
-    try:
-        opts, args = getopt.getopt(
-            argv,
-            "c:p:f:l:m:r:z:j:o:e:r:d:t:b:h:",
-            ["help"],
-        )
-    except Exception as e:
-        print(str(e) + "\n" + ayuda)
-        sys.exit()
-    opciones = {
-        "c": "clear",
-        "p": "percentage",
-        "f": "fps",
-        "m": "max_length",
-        "l": "limit",
-        "r": "random_weighted",
-        "z": "crazy",
-        "j": "justCalculating",
-        "o": "cicles",
-        "e": "seed",
-        "d": "filled",
-        "t": "timeout",
-        "h": "head",
-        "b": "body",
-    }
-    for x in opts:
-        flag = x[0].replace("-", "")
-        if flag == "help":
-            print(ayuda)
-            sys.exit()
-        option = opciones[flag]
-        if option in ("clear", "random_weighted", "crazy", "justCalculating", "filled"):
-            returneo[option] = x[1] in true
-        elif option in (
-            "percentage",
-            "fps",
-            "max_length",
-            "limit",
-            "cicles",
-            "timeout",
-        ):
-            try:
-                returneo[option] = int(x[1])
-            except ValueError:
-                print(
-                    'Flag "' + flag + "\" couldn't be converted to integer. Exiting...",
-                )
-                sys.exit()
-        elif option in ("head", "body"):
-            if len(x[1]) != 1:
-                print("Invalid character")
-                print(ayuda)
-                sys.exit()
-            else:
-                returneo[option] = x[1]
-        elif option == "seed":
-            try:
-                returneo[option] = int(x[1])
-            except:  # noqa: E722
-                returneo[option] = False
-        else:
-            print(f"Option {option} unhandled. Exiting...")
-            sys.exit()
-    return Config(**returneo)  # type: ignore
+    parser.add_argument(
+        "-c",
+        "--dont-clear",
+        action="store_true",
+        help="Controls if dead snakes should be cleaned up",
+    )
+    parser.add_argument(
+        "-p",
+        "--probability",
+        default=100,
+        type=int,
+        help="Probability of creating a new snake in each frame",
+    )
+    parser.add_argument(
+        "-f",
+        "--fps",
+        default=10,
+        type=int,
+        help="Number of frames per second",
+    )
+    parser.add_argument(
+        "-l",
+        "--length",
+        default=-1,
+        type=int,
+        help="Length limit of the snakes",
+    )
+    parser.add_argument(
+        "-r",
+        "--random-weights",
+        action="store_true",
+        help="Controls if the weights of the snakes decisions should be randomized",
+    )
+    parser.add_argument(
+        "-z",
+        "--crazy",
+        action="store_true",
+        help="Controls if the snake possible movements are randomized",
+    )
+    parser.add_argument(
+        "-j",
+        "--headless",
+        help="Controls if the program should run in headless mode",
+    )
+    parser.add_argument(
+        "-o",
+        "--cycles",
+        default=6000,
+        type=int,
+        help="Cycles to compute when just computing",
+    )
+    parser.add_argument(
+        "-e",
+        "--seed",
+        default=False,
+        type=int,
+        help="Random seed to use",
+    )
+    parser.add_argument(
+        "-d",
+        "--reset",
+        action="store_true",
+        help="Controls if the map should be reset when filled",
+    )
+    parser.add_argument(
+        "-t",
+        "--reset-time",
+        default=10,
+        type=int,
+        help="Controls how much time should be waited before reseting the map",
+    )
+    parser.add_argument(
+        "--head",
+        default="O",
+        type=str,
+        help="Character that represents the head of the snakes",
+    )
+    parser.add_argument(
+        "--body",
+        default="#",
+        type=str,
+        help="Character that represents the body of the snakes",
+    )
+    args: argparse.Namespace = parser.parse_args()
+    return Config(
+        clear=not args.dont_clear,
+        percentage=args.probability,
+        fps=args.fps,
+        max_length=args.length,
+        limit=args.length,
+        random_weighted=args.random_weights,
+        crazy=args.crazy,
+        justCalculating=args.headless,
+        cicles=args.cycles,
+        seed=args.seed,
+        filled=args.reset,
+        timeout=args.reset_time,
+        head=args.head,
+        body=args.body,
+    )

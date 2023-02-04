@@ -16,7 +16,7 @@ jobs:
     - name: Install dependencies
       run: poetry install --with dev
     - name: Run tests
-      run: poetry run pytest --cov=overengineered_snakes --cov-report=xml
+      run: poetry run pytest --cov=overengineered_snakes --cov-report=xml --cov-branch
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
       env:

@@ -1,5 +1,7 @@
 on:
   pull_request:
+  push:
+    - master
 
 jobs:
   pre-commit:

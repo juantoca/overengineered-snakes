@@ -40,10 +40,13 @@ class Head(Tile):  # Head of the snake
         self.behaviour = behaviour
         self.start_coordinates = self.coords
         self.limit = limit
-        self.trigered = False
         self.length = 0
         self.body_char = body_char
         self.nextone = self.coords
+
+    @property
+    def at_maximum_length(self) -> bool:
+        return self.length == self.limit
 
     def run(self, handler) -> bool:  # type: ignore
         """
@@ -63,11 +66,6 @@ class Head(Tile):  # Head of the snake
         else:
             die = True  # If not, we kill it
             self.die(handler)
-        if (
-            self.length == self.limit and not self.trigered
-        ):  # We add the snake to the cleaner in case it has reached the length limit
-            handler.removing.append(self.start_coordinates)
-            self.trigered = True
         self.length += 1
         # Returns if the head has died(so the cleaner can give it a proper burial)
         return die

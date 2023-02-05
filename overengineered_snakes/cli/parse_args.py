@@ -38,6 +38,13 @@ def get_config() -> Config:
         help="Length limit of the snakes",
     )
     parser.add_argument(
+        "-n",
+        "--num_snakes",
+        default=-1,
+        type=int,
+        help="Maximum number of snakes",
+    )
+    parser.add_argument(
         "-r",
         "--random-weights",
         action="store_true",
@@ -99,7 +106,7 @@ def get_config() -> Config:
         percentage=args.probability,
         fps=args.fps,
         max_length=args.length,
-        limit=args.length,
+        limit=args.num_snakes,
         random_weighted=args.random_weights,
         crazy=args.crazy,
         justCalculating=args.headless,

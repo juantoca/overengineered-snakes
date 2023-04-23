@@ -28,3 +28,14 @@ def test_head_move(head: Head, mapa: Mapa, coords: Tuple[int, int]) -> None:
     assert type(mapa.get_coords(original_coords)) is Body
     assert type(mapa.get_coords(coords)) is Head
     assert head.nextone == original_coords
+
+
+@given(head_st, integers(0))
+def test_head_at_maximum_length(head: Head, current_length: int) -> None:
+    head.length = current_length
+    assert head.at_maximum_length == (current_length == head.limit)
+
+
+@given(head_st, empty_mapa_st)
+def test_head_run_die_empty_map(head: Head, mapa: Mapa) -> None:
+    assert not head.run(mapa)

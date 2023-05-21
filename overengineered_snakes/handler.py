@@ -66,10 +66,15 @@ class Handler(Mapa):
         for x in range(0, len(self.heads)):  # Updates the heads
             die = self.heads[x].run(self)
             if die:
-                if not self.heads[x].trigered:
+                if self.heads[x].start_coordinates not in self.removing:
                     self.removing.append(self.heads[x].start_coordinates)
                     # We set that there's a new snake that needs a meatgrinder session
                 delete.append(self.heads[x])
+            if (
+                self.heads[x].at_maximum_length
+                and self.heads[x].start_coordinates not in self.removing
+            ):
+                self.removing.append(self.heads[x].start_coordinates)
         for x_ in delete:
             self.heads.remove(x_)
         if self.clear:

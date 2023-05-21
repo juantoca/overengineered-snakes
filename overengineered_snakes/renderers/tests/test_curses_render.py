@@ -31,3 +31,8 @@ def test_curses_renderer(mapa: Mapa) -> None:
         renderer.render(mapa)
 
         renderer.stdscr.refresh.assert_called_once()
+
+    for v1, v2 in zip(mapa, mapa2):
+        _, tile1 = v1
+        _, tile2 = v2
+        assert tile1.character == tile2.character

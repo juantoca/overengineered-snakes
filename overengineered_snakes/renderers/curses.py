@@ -13,8 +13,7 @@ class CursesRenderer:
             curses.init_pair(i + 1, i, -1)
 
     def render(self, mapa: Mapa) -> None:
-        for y_i, y in enumerate(range(0, len(mapa.grid))):
-            y_array = mapa.grid[y]
-            for x_i, x in enumerate(y_array):
-                self.stdscr.addch(y_i, x_i, x.character, curses.color_pair(x.color))
+        for coords, tile in mapa:
+            x_i, y_i = coords
+            self.stdscr.addch(y_i, x_i, tile.character, curses.color_pair(tile.color))
         self.stdscr.refresh()

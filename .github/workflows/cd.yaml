@@ -1,0 +1,13 @@
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - master
+
+jobs:
+    create-tag:
+      uses: ./.github/workflows/step_create_tag.yaml
+      secrets: inherit
+    create-release:
+      uses: ./.github/workflows/step_create_release.yaml
+      secrets: inherit

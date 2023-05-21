@@ -2,7 +2,7 @@ on:
   workflow_call:
 
 jobs:
-    release-python-package:
+    create-tag:
         runs-on: ubuntu-22.04
         steps:
             - name: Checkout

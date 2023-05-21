@@ -1,7 +1,9 @@
 from typing import Tuple
+from unittest.mock import Mock
 
 from hypothesis import assume
 from hypothesis import given
+from hypothesis.strategies import booleans
 from hypothesis.strategies import integers
 from hypothesis.strategies import tuples
 
@@ -36,6 +38,9 @@ def test_head_at_maximum_length(head: Head, current_length: int) -> None:
     assert head.at_maximum_length == (current_length == head.limit)
 
 
-@given(head_st, empty_mapa_st)
-def test_head_run_die_empty_map(head: Head, mapa: Mapa) -> None:
-    assert not head.run(mapa)
+@given(head_st, empty_mapa_st, booleans())
+def test_head_run(head: Head, mapa: Mapa, map_filled: bool) -> None:
+    head.move = Mock()  # type: ignore
+    head.die = Mock()  # type: ignore
+    head.behaviour.choose = Mock(return_value=map_filled)  # type: ignore
+    assert head.run(mapa) is not map_filled

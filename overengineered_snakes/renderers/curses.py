@@ -13,12 +13,8 @@ class CursesRenderer:
             curses.init_pair(i + 1, i, -1)
 
     def render(self, handler: Handler) -> None:
-        self.stdscr.clear()
-        for y in range(0, len(handler.grid) - 1):
+        for y_i, y in enumerate(range(0, len(handler.grid))):
             y_array = handler.grid[y]
-            for x in y_array:
-                self.stdscr.addstr(x.character, curses.color_pair(x.color))
-            self.stdscr.addstr("\n")
-        for x in handler.grid[-1]:
-            self.stdscr.addstr(x.character, curses.color_pair(x.color))
+            for x_i, x in enumerate(y_array):
+                self.stdscr.addch(y_i, x_i, x.character, curses.color_pair(x.color))
         self.stdscr.refresh()

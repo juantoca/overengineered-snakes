@@ -5,12 +5,12 @@ from unittest.mock import patch
 from hypothesis import given
 
 from overengineered_snakes.backend.mapa import Mapa
-from overengineered_snakes.backend.tests.strategies.mapa import empty_mapa_st
+from overengineered_snakes.backend.tests.strategies.mapa import random_chars_mapa_st
 from overengineered_snakes.backend.tiles.tile import Tile
 from overengineered_snakes.renderers.curses import CursesRenderer
 
 
-@given(empty_mapa_st)
+@given(random_chars_mapa_st())
 def test_curses_renderer(mapa: Mapa) -> None:
     mapa2 = Mapa(mapa.alto, mapa.ancho)
 

@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from typing import Tuple
 
 from overengineered_snakes.backend.tiles.tile import Tile
@@ -13,6 +14,12 @@ class Mapa:
         self.alto = alto
         self.ancho = ancho
         self.grid = self.gen_grid()
+
+    def __iter__(self) -> Iterator[Tuple[Tuple[int, int], Tile]]:
+        for y_i, y in enumerate(range(0, len(self.grid))):
+            y_array = self.grid[y]
+            for x_i, x in enumerate(y_array):
+                yield (x_i, y_i), x
 
     def gen_grid(self) -> list[list[Tile]]:
         """

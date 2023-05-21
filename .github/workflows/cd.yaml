@@ -6,8 +6,12 @@ on:
 
 jobs:
     create-tag:
+      needs:
+        - unittests
       uses: ./.github/workflows/step_create_tag.yaml
       secrets: inherit
     create-release:
+      needs:
+        - create-tag
       uses: ./.github/workflows/step_create_release.yaml
       secrets: inherit

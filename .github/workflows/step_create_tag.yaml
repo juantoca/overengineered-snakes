@@ -10,6 +10,7 @@ jobs:
               with:
                 fetch-depth: 0
             - name: get_version
+              id: get_version
               uses: mikefarah/yq@master
               with:
                 cmd: yq -oy ".tool.poetry.version" ./pyproject.toml

@@ -20,3 +20,6 @@ jobs:
                 tag: "v${{ steps.get_version.outputs.result }}"
                 tag_exists_error: true
                 message: ""
+            - name: cancelling
+              if: ${{steps.tag_create.outputs.tag_exists}}
+              uses: andymckay/cancel-action@0.3

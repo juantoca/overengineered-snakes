@@ -9,7 +9,7 @@ packages = [{include = "overengineered_snakes"}]
 exclude = ["**/test*"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 
 [tool.poetry.scripts]
 snakes = "overengineered_snakes.snakes:main"

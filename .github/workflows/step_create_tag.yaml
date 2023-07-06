@@ -18,7 +18,7 @@ jobs:
               id: "tag_create"
               with:
                 tag: "v${{ steps.get_version.outputs.result }}"
-                tag_exists_error: true
+                tag_exists_error: false
                 message: ""
             - name: cancelling
               if: ${{steps.tag_create.outputs.tag_exists}}

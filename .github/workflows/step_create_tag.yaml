@@ -1,9 +1,15 @@
 on:
   workflow_call:
+    outputs:
+      tag-exists:
+        description: "True if the tag already exist, false otherwise"
+        value: ${{ jobs.create-tag.outputs.tag-exists }}
 
 jobs:
     create-tag:
         runs-on: ubuntu-22.04
+        outputs:
+          tag-exists: ${{ steps.tag_create.tag_exists }}
         steps:
             - name: Checkout
               uses: actions/checkout@v3
@@ -20,6 +26,3 @@ jobs:
                 tag: "v${{ steps.get_version.outputs.result }}"
                 tag_exists_error: false
                 message: ""
-            - name: cancelling
-              if: ${{steps.tag_create.outputs.tag_exists}}
-              uses: andymckay/cancel-action@0.3

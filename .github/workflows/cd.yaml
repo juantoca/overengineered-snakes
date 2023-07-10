@@ -9,7 +9,6 @@ jobs:
       uses: ./.github/workflows/step_create_tag.yaml
       secrets: inherit
     create-release:
-      if: ${{ !needs.create-tag.outputs.tag-exists }}
       needs:
         - create-tag
       if: ${{ !needs.create-tag.outputs.tag-exists }}

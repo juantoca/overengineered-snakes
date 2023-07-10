@@ -11,6 +11,8 @@ jobs:
       secrets: inherit
     test-job:
       runs-on: ubuntu-22.04
+      needs:
+        - create-tag
       steps:
         - name: get-output
           run: echo ${{ needs.create-tag.outputs.tag-exists }}

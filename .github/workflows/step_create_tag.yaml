@@ -26,3 +26,5 @@ jobs:
                 tag: "v${{ steps.get_version.outputs.result }}"
                 tag_exists_error: false
                 message: ""
+            - name: get-output
+              run: echo ${{ steps.tag_create.tag_exists }}

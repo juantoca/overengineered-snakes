@@ -27,4 +27,4 @@ jobs:
                 tag_exists_error: false
                 message: ""
             - name: get-output
-              run: echo ${{ steps.tag_create.tag_exists }}
+              run: echo ${{ env.TAG_EXISTS }}
